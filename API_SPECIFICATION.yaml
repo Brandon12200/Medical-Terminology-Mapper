@@ -1,0 +1,1367 @@
+openapi: 3.0.3
+info:
+  title: Medical Terminology Mapper API
+  description: |
+    API for mapping medical terminology to standard vocabularies.
+    This API provides endpoints for identifying medical terms in text and mapping them to standard
+    terminologies including SNOMED CT, RxNorm, and LOINC with output in FHIR and OMOP formats.
+  version: 1.0.0
+  contact:
+    name: Development Team
+    email: dev@example.com
+
+servers:
+  - url: http://localhost:8000/api
+    description: Local development server
+  - url: https://api.terminology-mapper.example.com/api
+    description: Production server
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+          example: 404
+        message:
+          type: string
+          example: "Resource not found"
+        details:
+          type: string
+          example: "The requested term mapping does not exist"
+
+    Term:
+      type: object
+      properties:
+        text:
+          type: string
+          description: The recognized medical term
+          example: "metformin"
+        start:
+          type: integer
+          description: Start position in original text
+          example: 10
+        end:
+          type: integer
+          description: End position in original text
+          example: 19
+        type:
+          type: string
+          description: Type of medical term
+          enum: [MEDICATION, CONDITION, PROCEDURE, LAB_TEST, DOSAGE, FREQUENCY, ANATOMY, FINDING]
+          example: "MEDICATION"
+        confidence:
+          type: number
+          format: float
+          description: Confidence score of term recognition
+          minimum: 0
+          maximum: 1
+          example: 0.95
+        attributes:
+          type: object
+          description: Additional attributes specific to term type
+          additionalProperties: true
+          example: {"dose": "500mg", "frequency": "twice daily"}
+
+    ConceptReference:
+      type: object
+      properties:
+        source:
+          type: string
+          description: The terminology source
+          enum: [SNOMED_CT, RXNORM, LOINC, CUSTOM]
+          example: "RXNORM"
+        concept_id:
+          type: string
+          description: The concept identifier in the source terminology
+          example: "6809"
+        name:
+          type: string
+          description: The preferred name of the concept
+          example: "metformin"
+        code:
+          type: string
+          description: Alternative code if applicable
+          example: "6809"
+        confidence:
+          type: number
+          format: float
+          description: Confidence score of the mapping
+          minimum: 0
+          maximum: 1
+          example: 0.98
+
+    TermMapping:
+      type: object
+      properties:
+        original:
+          $ref: '#/components/schemas/Term'
+        mappings:
+          type: array
+          description: Mappings to standard terminologies
+          items:
+            $ref: '#/components/schemas/ConceptReference'
+
+    FHIRResource:
+      type: object
+      properties:
+        resourceType:
+          type: string
+          example: "CodeableConcept"
+        coding:
+          type: array
+          items:
+            type: object
+            properties:
+              system:
+                type: string
+                example: "http://www.nlm.nih.gov/research/umls/rxnorm"
+              code:
+                type: string
+                example: "6809"
+              display:
+                type: string
+                example: "metformin"
+              userSelected:
+                type: boolean
+                example: true
+        text:
+          type: string
+          example: "metformin"
+
+    OMOPConcept:
+      type: object
+      properties:
+        concept_id:
+          type: integer
+          example: 1503297
+        concept_name:
+          type: string
+          example: "metformin"
+        domain_id:
+          type: string
+          example: "Drug"
+        vocabulary_id:
+          type: string
+          example: "RxNorm"
+        concept_class_id:
+          type: string
+          example: "Ingredient"
+        standard_concept:
+          type: string
+          example: "S"
+        concept_code:
+          type: string
+          example: "6809"
+        source_value:
+          type: string
+          example: "metformin"
+        source_vocabulary_id:
+          type: string
+          example: "RxNorm"
+
+    OMOPMapping:
+      type: object
+      properties:
+        condition_occurrence:
+          type: array
+          items:
+            $ref: '#/components/schemas/OMOPConcept'
+        drug_exposure:
+          type: array
+          items:
+            $ref: '#/components/schemas/OMOPConcept'
+        procedure_occurrence:
+          type: array
+          items:
+            $ref: '#/components/schemas/OMOPConcept'
+        measurement:
+          type: array
+          items:
+            $ref: '#/components/schemas/OMOPConcept'
+        observation:
+          type: array
+          items:
+            $ref: '#/components/schemas/OMOPConcept'
+
+    JobStatus:
+      type: object
+      properties:
+        job_id:
+          type: string
+          format: uuid
+          example: "1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p"
+        status:
+          type: string
+          enum: [QUEUED, PROCESSING, COMPLETED, FAILED, CANCELED]
+          example: "PROCESSING"
+        progress:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 100
+          example: 65.5
+        created_at:
+          type: string
+          format: date-time
+          example: "2023-05-09T10:15:30Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2023-05-09T10:16:45Z"
+        estimated_completion:
+          type: string
+          format: date-time
+          example: "2023-05-09T10:18:30Z"
+        message:
+          type: string
+          example: "Processing page 14 of 26"
+
+    TerminologySource:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "snomed_ct"
+        name:
+          type: string
+          example: "SNOMED CT"
+        version:
+          type: string
+          example: "2023-03 International"
+        description:
+          type: string
+          example: "Systematized Nomenclature of Medicine -- Clinical Terms"
+        status:
+          type: string
+          enum: [ACTIVE, LOADING, INACTIVE, ERROR]
+          example: "ACTIVE"
+        entry_count:
+          type: integer
+          example: 426749
+
+security:
+  - ApiKeyAuth: []
+  - BearerAuth: []
+
+paths:
+  /recognize:
+    post:
+      summary: Recognize medical terms in text
+      description: Identifies medical terms and their types in the provided text using BioBERT and pattern matching
+      operationId: recognizeTerms
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - text
+              properties:
+                text:
+                  type: string
+                  description: Text to analyze for medical terms
+                  example: "Patient is taking metformin 500mg twice daily for type 2 diabetes mellitus"
+                confidence_threshold:
+                  type: number
+                  format: float
+                  description: Minimum confidence threshold for term recognition (0-1)
+                  minimum: 0
+                  maximum: 1
+                  default: 0.7
+                  example: 0.7
+                use_context:
+                  type: boolean
+                  description: Whether to use context for improved recognition
+                  default: true
+                  example: true
+      responses:
+        '200':
+          description: Successfully recognized terms
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  terms:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Term'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /map:
+    post:
+      summary: Map medical terms to standard terminologies
+      description: Maps identified medical terms to standard terminologies like SNOMED CT, RxNorm, and LOINC
+      operationId: mapTerms
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - terms
+              properties:
+                terms:
+                  type: array
+                  description: Terms to map to standard terminologies
+                  items:
+                    type: object
+                    required:
+                      - text
+                    properties:
+                      text:
+                        type: string
+                        description: The medical term to map
+                        example: "metformin"
+                      type:
+                        type: string
+                        description: Type of medical term (optional, improves mapping accuracy)
+                        enum: [MEDICATION, CONDITION, PROCEDURE, LAB_TEST, DOSAGE, FREQUENCY, ANATOMY, FINDING]
+                        example: "MEDICATION"
+                      context:
+                        type: string
+                        description: Surrounding context of the term (optional, improves mapping accuracy)
+                        example: "Patient is taking metformin 500mg twice daily"
+                sources:
+                  type: array
+                  description: Terminology sources to use for mapping
+                  default: ["SNOMED_CT", "RXNORM", "LOINC"]
+                  items:
+                    type: string
+                    enum: [SNOMED_CT, RXNORM, LOINC, CUSTOM]
+                  example: ["RXNORM", "SNOMED_CT"]
+                confidence_threshold:
+                  type: number
+                  format: float
+                  description: Minimum confidence threshold for mapping (0-1)
+                  minimum: 0
+                  maximum: 1
+                  default: 0.7
+                  example: 0.7
+                include_alternatives:
+                  type: boolean
+                  description: Whether to include alternative mappings
+                  default: false
+                  example: false
+                max_alternatives:
+                  type: integer
+                  description: Maximum number of alternative mappings to include
+                  default: 3
+                  example: 3
+      responses:
+        '200':
+          description: Successfully mapped terms
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mappings:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TermMapping'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /convert:
+    post:
+      summary: Convert mapped terms to standard formats
+      description: Converts mapped terms to FHIR or OMOP format
+      operationId: convertMappings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - mappings
+                - format
+              properties:
+                mappings:
+                  type: array
+                  description: Mapped terms to convert
+                  items:
+                    $ref: '#/components/schemas/TermMapping'
+                format:
+                  type: string
+                  description: Output format
+                  enum: [FHIR, OMOP]
+                  example: "FHIR"
+                fhir_version:
+                  type: string
+                  description: FHIR version to use (when format is FHIR)
+                  enum: [R4, STU3]
+                  default: "R4"
+                  example: "R4"
+                omop_version:
+                  type: string
+                  description: OMOP CDM version to use (when format is OMOP)
+                  enum: [5.3, 5.4]
+                  default: "5.4"
+                  example: "5.4"
+      responses:
+        '200':
+          description: Successfully converted mappings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  format:
+                    type: string
+                    enum: [FHIR, OMOP]
+                    example: "FHIR"
+                  resources:
+                    oneOf:
+                      - type: array
+                        items:
+                          $ref: '#/components/schemas/FHIRResource'
+                      - $ref: '#/components/schemas/OMOPMapping'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /process:
+    post:
+      summary: Process text in a single request
+      description: Combined endpoint to recognize, map, and convert in a single request
+      operationId: processText
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - text
+              properties:
+                text:
+                  type: string
+                  description: Medical text to process
+                  example: "Patient is taking metformin 500mg twice daily for type 2 diabetes mellitus"
+                output_format:
+                  type: string
+                  description: Desired output format
+                  enum: [FHIR, OMOP]
+                  default: "FHIR"
+                  example: "FHIR"
+                sources:
+                  type: array
+                  description: Terminology sources to use
+                  default: ["SNOMED_CT", "RXNORM", "LOINC"]
+                  items:
+                    type: string
+                    enum: [SNOMED_CT, RXNORM, LOINC, CUSTOM]
+                  example: ["RXNORM", "SNOMED_CT", "LOINC"]
+                confidence_threshold:
+                  type: number
+                  format: float
+                  description: Minimum confidence threshold
+                  minimum: 0
+                  maximum: 1
+                  default: 0.7
+                  example: 0.7
+      responses:
+        '200':
+          description: Successfully processed text
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  terms:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Term'
+                  mappings:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TermMapping'
+                  output:
+                    type: object
+                    properties:
+                      format:
+                        type: string
+                        enum: [FHIR, OMOP]
+                        example: "FHIR"
+                      resources:
+                        oneOf:
+                          - type: array
+                            items:
+                              $ref: '#/components/schemas/FHIRResource'
+                          - $ref: '#/components/schemas/OMOPMapping'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /batch/submit:
+    post:
+      summary: Submit batch processing job
+      description: Submit a batch of documents for asynchronous processing
+      operationId: submitBatchJob
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  description: Files to process (txt, pdf, docx, csv, json)
+                config:
+                  type: object
+                  properties:
+                    batch_name:
+                      type: string
+                      description: Name for the batch job
+                      example: "Clinical Notes May 2023"
+                    output_format:
+                      type: string
+                      description: Desired output format
+                      enum: [FHIR, OMOP, CSV, JSON]
+                      default: "FHIR"
+                      example: "FHIR"
+                    sources:
+                      type: array
+                      description: Terminology sources to use
+                      default: ["SNOMED_CT", "RXNORM", "LOINC"]
+                      items:
+                        type: string
+                        enum: [SNOMED_CT, RXNORM, LOINC, CUSTOM]
+                      example: ["SNOMED_CT", "RXNORM", "LOINC"]
+                    confidence_threshold:
+                      type: number
+                      format: float
+                      description: Minimum confidence threshold
+                      minimum: 0
+                      maximum: 1
+                      default: 0.7
+                      example: 0.7
+                    notification_email:
+                      type: string
+                      format: email
+                      description: Email to notify when batch processing is complete
+                      example: "user@example.com"
+      responses:
+        '202':
+          description: Batch job accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  job_id:
+                    type: string
+                    format: uuid
+                    example: "1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p"
+                  status:
+                    type: string
+                    enum: [QUEUED]
+                    example: "QUEUED"
+                  files_count:
+                    type: integer
+                    example: 3
+                  status_url:
+                    type: string
+                    format: uri
+                    example: "/api/batch/status/1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p"
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /batch/status/{job_id}:
+    get:
+      summary: Get batch job status
+      description: Check the status of a batch processing job
+      operationId: getBatchJobStatus
+      parameters:
+        - name: job_id
+          in: path
+          required: true
+          description: ID of the batch job
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Job status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobStatus'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Job not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /batch/results/{job_id}:
+    get:
+      summary: Get batch job results
+      description: Retrieve the results of a completed batch processing job
+      operationId: getBatchJobResults
+      parameters:
+        - name: job_id
+          in: path
+          required: true
+          description: ID of the batch job
+          schema:
+            type: string
+            format: uuid
+        - name: format
+          in: query
+          required: false
+          description: Result format
+          schema:
+            type: string
+            enum: [json, csv, fhir, omop]
+            default: json
+            example: "json"
+      responses:
+        '200':
+          description: Job results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  job_id:
+                    type: string
+                    format: uuid
+                    example: "1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p"
+                  status:
+                    type: string
+                    enum: [COMPLETED]
+                    example: "COMPLETED"
+                  files_processed:
+                    type: integer
+                    example: 3
+                  terms_recognized:
+                    type: integer
+                    example: 532
+                  terms_mapped:
+                    type: integer
+                    example: 498
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        file_name:
+                          type: string
+                          example: "clinical_notes_001.txt"
+                        terms:
+                          type: array
+                          items:
+                            $ref: '#/components/schemas/Term'
+                        mappings:
+                          type: array
+                          items:
+                            $ref: '#/components/schemas/TermMapping'
+                        output:
+                          type: object
+                          properties:
+                            format:
+                              type: string
+                              enum: [FHIR, OMOP]
+                              example: "FHIR"
+                            resources:
+                              oneOf:
+                                - type: array
+                                  items:
+                                    $ref: '#/components/schemas/FHIRResource'
+                                - $ref: '#/components/schemas/OMOPMapping'
+                  download_urls:
+                    type: object
+                    properties:
+                      json:
+                        type: string
+                        format: uri
+                        example: "/api/batch/download/1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p?format=json"
+                      csv:
+                        type: string
+                        format: uri
+                        example: "/api/batch/download/1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p?format=csv"
+                      fhir:
+                        type: string
+                        format: uri
+                        example: "/api/batch/download/1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p?format=fhir"
+                      omop:
+                        type: string
+                        format: uri
+                        example: "/api/batch/download/1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p?format=omop"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Job not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /terminology/sources:
+    get:
+      summary: Get available terminology sources
+      description: List all available terminology sources and their status
+      operationId: getTerminologySources
+      responses:
+        '200':
+          description: Available terminology sources
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sources:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TerminologySource'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /terminology/search:
+    get:
+      summary: Search terminology concepts
+      description: Search for concepts across terminology sources
+      operationId: searchTerminology
+      parameters:
+        - name: query
+          in: query
+          required: true
+          description: Search query
+          schema:
+            type: string
+            example: "diabetes"
+        - name: source
+          in: query
+          required: false
+          description: Terminology source to search
+          schema:
+            type: string
+            enum: [SNOMED_CT, RXNORM, LOINC, ALL]
+            default: ALL
+            example: "SNOMED_CT"
+        - name: limit
+          in: query
+          required: false
+          description: Maximum number of results
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+            example: 20
+        - name: offset
+          in: query
+          required: false
+          description: Result offset for pagination
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+            example: 0
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  query:
+                    type: string
+                    example: "diabetes"
+                  total_results:
+                    type: integer
+                    example: 432
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        source:
+                          type: string
+                          enum: [SNOMED_CT, RXNORM, LOINC]
+                          example: "SNOMED_CT"
+                        concept_id:
+                          type: string
+                          example: "73211009"
+                        name:
+                          type: string
+                          example: "Diabetes mellitus"
+                        code:
+                          type: string
+                          example: "73211009"
+                        concept_class:
+                          type: string
+                          example: "Clinical finding"
+                        synonyms:
+                          type: array
+                          items:
+                            type: string
+                          example: ["DM - Diabetes mellitus", "Diabetes"]
+                        score:
+                          type: number
+                          format: float
+                          description: Search relevance score
+                          example: 0.95
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /custom/mappings:
+    get:
+      summary: Get custom mappings
+      description: Retrieve all custom mappings
+      operationId: getCustomMappings
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          description: Maximum number of results
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+            example: 20
+        - name: offset
+          in: query
+          required: false
+          description: Result offset for pagination
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+            example: 0
+      responses:
+        '200':
+          description: Custom mappings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                    example: 42
+                  mappings:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        source_pattern:
+                          type: string
+                          example: "a1c"
+                        concept_id:
+                          type: string
+                          example: "4548-4"
+                        source:
+                          type: string
+                          example: "LOINC"
+                        concept_name:
+                          type: string
+                          example: "Hemoglobin A1c"
+                        priority:
+                          type: integer
+                          example: 100
+                        is_regex:
+                          type: boolean
+                          example: false
+                        created_by:
+                          type: string
+                          example: "john.doe"
+                        created_at:
+                          type: string
+                          format: date-time
+                          example: "2023-05-09T10:15:30Z"
+                        active:
+                          type: boolean
+                          example: true
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      summary: Create custom mapping
+      description: Create a new custom mapping
+      operationId: createCustomMapping
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - source_pattern
+                - concept_id
+                - source
+              properties:
+                source_pattern:
+                  type: string
+                  description: Pattern to match in source text
+                  example: "a1c"
+                concept_id:
+                  type: string
+                  description: ID of the concept in the source terminology
+                  example: "4548-4"
+                source:
+                  type: string
+                  description: Terminology source
+                  enum: [SNOMED_CT, RXNORM, LOINC]
+                  example: "LOINC"
+                context_pattern:
+                  type: string
+                  description: Optional context pattern for conditional mapping
+                  example: "test|level|result"
+                priority:
+                  type: integer
+                  description: Mapping priority (higher takes precedence)
+                  default: 100
+                  example: 100
+                is_regex:
+                  type: boolean
+                  description: Whether the pattern is a regular expression
+                  default: false
+                  example: false
+      responses:
+        '201':
+          description: Custom mapping created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  message:
+                    type: string
+                    example: "Custom mapping created successfully"
+                  mapping:
+                    type: object
+                    properties:
+                      source_pattern:
+                        type: string
+                        example: "a1c"
+                      concept_id:
+                        type: string
+                        example: "4548-4"
+                      source:
+                        type: string
+                        example: "LOINC"
+                      concept_name:
+                        type: string
+                        example: "Hemoglobin A1c"
+                      priority:
+                        type: integer
+                        example: 100
+                      is_regex:
+                        type: boolean
+                        example: false
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /custom/mappings/{id}:
+    get:
+      summary: Get custom mapping
+      description: Get a specific custom mapping by ID
+      operationId: getCustomMapping
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Custom mapping ID
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Custom mapping
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  source_pattern:
+                    type: string
+                    example: "a1c"
+                  concept_id:
+                    type: string
+                    example: "4548-4"
+                  source:
+                    type: string
+                    example: "LOINC"
+                  concept_name:
+                    type: string
+                    example: "Hemoglobin A1c"
+                  priority:
+                    type: integer
+                    example: 100
+                  context_pattern:
+                    type: string
+                    example: "test|level|result"
+                  is_regex:
+                    type: boolean
+                    example: false
+                  created_by:
+                    type: string
+                    example: "john.doe"
+                  created_at:
+                    type: string
+                    format: date-time
+                    example: "2023-05-09T10:15:30Z"
+                  active:
+                    type: boolean
+                    example: true
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Custom mapping not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      summary: Update custom mapping
+      description: Update an existing custom mapping
+      operationId: updateCustomMapping
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Custom mapping ID
+          schema:
+            type: integer
+            example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                source_pattern:
+                  type: string
+                  description: Pattern to match in source text
+                  example: "hba1c"
+                concept_id:
+                  type: string
+                  description: ID of the concept in the source terminology
+                  example: "4548-4"
+                source:
+                  type: string
+                  description: Terminology source
+                  enum: [SNOMED_CT, RXNORM, LOINC]
+                  example: "LOINC"
+                context_pattern:
+                  type: string
+                  description: Optional context pattern for conditional mapping
+                  example: "test|level|result"
+                priority:
+                  type: integer
+                  description: Mapping priority (higher takes precedence)
+                  example: 110
+                is_regex:
+                  type: boolean
+                  description: Whether the pattern is a regular expression
+                  example: true
+                active:
+                  type: boolean
+                  description: Whether the mapping is active
+                  example: true
+      responses:
+        '200':
+          description: Custom mapping updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  message:
+                    type: string
+                    example: "Custom mapping updated successfully"
+                  mapping:
+                    type: object
+                    properties:
+                      source_pattern:
+                        type: string
+                        example: "hba1c"
+                      concept_id:
+                        type: string
+                        example: "4548-4"
+                      source:
+                        type: string
+                        example: "LOINC"
+                      concept_name:
+                        type: string
+                        example: "Hemoglobin A1c"
+                      priority:
+                        type: integer
+                        example: 110
+                      is_regex:
+                        type: boolean
+                        example: true
+                      active:
+                        type: boolean
+                        example: true
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Custom mapping not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      summary: Delete custom mapping
+      description: Delete a custom mapping
+      operationId: deleteCustomMapping
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Custom mapping ID
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Custom mapping deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  message:
+                    type: string
+                    example: "Custom mapping deleted successfully"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Custom mapping not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
