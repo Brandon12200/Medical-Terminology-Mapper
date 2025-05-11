@@ -77,7 +77,3 @@ standardized_terms = response.json()
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Acknowledgments
-
-This project builds upon open-source medical terminology resources and BioBERT models developed by the biomedical NLP community.# Medical-Terminology-Mapper
