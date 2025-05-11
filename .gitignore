@@ -1,0 +1,36 @@
+# Planning/Documentation files
+*.md
+!README.md
+
+# IDE files
+.idea/
+.vscode/
+*.sublime-*
+
+# OS files
+.DS_Store
+.Thumbs.db
+
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+yarn-debug.log
+
+# Build artifacts
+/dist/
+/build/
+/out/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# YAML files
+*.yaml
+*.yml
+!API_SPECIFICATION.yaml
+**/.claude/settings.local.json
