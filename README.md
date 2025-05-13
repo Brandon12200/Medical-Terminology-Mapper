@@ -16,30 +16,34 @@ Medical Terminology Mapper addresses the critical healthcare interoperability ch
 
 ## Technical Stack
 
-- **Backend**: Node.js with Express framework
-- **Database**: Not yet implemented (will use MongoDB or PostgreSQL)
-- **TypeScript**: For type safety and better code organization
-- **Jest**: For comprehensive testing
-- **Winston**: For structured logging
+- **Backend**: Python with Flask framework
+- **Database**: SQLite for terminology storage with option to scale to PostgreSQL
+- **BioBERT**: For NLP-based terminology recognition
+- **Pytest**: For comprehensive testing
+- **Logging**: Python's built-in logging module for structured logging
 
 ## Project Structure
 
 ```
 medical-terminology-mapper/
-├── src/                      # Source code
+├── app/                      # Application code
 │   ├── api/                  # API routes and controllers
 │   ├── services/             # Business logic and services
-│   ├── models/               # Data models
+│   ├── models/               # Data models and model loader
 │   ├── utils/                # Utility functions
-│   └── index.ts              # Application entry point
+│   ├── standards/            # Standards implementation (FHIR, OMOP)
+│   │   └── terminology/      # Terminology-specific modules
+│   └── __init__.py           # Application initialization
+├── data/                     # Data files
+│   └── terminology/          # Terminology databases and sample data
 ├── tests/                    # Test files
 │   ├── unit/                 # Unit tests
 │   └── integration/          # Integration tests
-├── dist/                     # Compiled JavaScript files
+├── logs/                     # Log files
 ├── .gitignore                # Git ignore file
-├── package.json              # Node.js package file
-├── tsconfig.json             # TypeScript configuration
-└── jest.config.js            # Jest configuration
+├── requirements.txt          # Python dependencies
+├── setup.py                  # Package setup
+└── pytest.ini                # Pytest configuration
 ```
 
 ## Installation
@@ -49,30 +53,31 @@ medical-terminology-mapper/
 git clone https://github.com/yourusername/medical-terminology-mapper.git
 cd medical-terminology-mapper
 
+# Create and activate virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
 # Install dependencies
-npm install
+pip install -r requirements.txt
 
 # Run in development mode
-npm run dev
+python -m app.main
 
-# Build the project
-npm run build
-
-# Start the production server
-npm start
+# Start the production server with gunicorn
+gunicorn app.main:app
 ```
 
 ## Testing
 
 ```bash
 # Run all tests
-npm test
+pytest
 
 # Run tests with coverage
-npm run test:coverage
+pytest --cov=app
 
-# Run tests in watch mode
-npm run test:watch
+# Run specific test modules
+pytest tests/unit/
 ```
 
 ## API Usage

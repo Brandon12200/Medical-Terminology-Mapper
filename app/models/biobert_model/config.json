@@ -1,0 +1,7 @@
+{
+  "model_type": "biobert",
+  "name": "dmis-lab/biobert-base-cased-v1.2",
+  "version": "v1.0",
+  "entity_types": ["CONDITION", "MEDICATION", "PROCEDURE", "LAB_TEST", "OBSERVATION"],
+  "description": "BioBERT model adapted for medical terminology mapping"
+}

@@ -1,0 +1,4 @@
+2025-05-13 18:15:12 - setup_terminology_db - INFO - Starting terminology database setup
+2025-05-13 18:15:12 - setup_terminology_db - INFO - Using data directory: /Users/brandonkenney/Projects/medical-terminology-mapper/data/terminology
+2025-05-13 18:15:12 - setup_terminology_db - INFO - Creating sample databases...
+2025-05-13 18:15:12 - setup_terminology_db - INFO - Sample databases created successfully

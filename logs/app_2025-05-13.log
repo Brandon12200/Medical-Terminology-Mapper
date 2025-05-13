@@ -1,0 +1,57 @@
+2025-05-13 18:15:12 - root - INFO - Logger initialized
+2025-05-13 18:15:12 - app - INFO - Initializing Medical Terminology Mapper application
+2025-05-13 18:15:12 - setup_terminology_db - INFO - Starting terminology database setup
+2025-05-13 18:15:12 - setup_terminology_db - INFO - Using data directory: /Users/brandonkenney/Projects/medical-terminology-mapper/data/terminology
+2025-05-13 18:15:12 - setup_terminology_db - INFO - Creating sample databases...
+2025-05-13 18:15:12 - app.standards.terminology.db_updater - INFO - Creating sample snomed database...
+2025-05-13 18:15:12 - app.standards.terminology.db_updater - INFO - Created empty snomed database at /Users/brandonkenney/Projects/medical-terminology-mapper/data/terminology/snomed_core.sqlite
+2025-05-13 18:15:12 - app.standards.terminology.db_updater - INFO - Successfully imported 15 records into snomed database
+2025-05-13 18:15:12 - app.standards.terminology.db_updater - INFO - Sample snomed database created with 15 records
+2025-05-13 18:15:12 - app.standards.terminology.db_updater - INFO - Creating sample loinc database...
+2025-05-13 18:15:12 - app.standards.terminology.db_updater - INFO - Created empty loinc database at /Users/brandonkenney/Projects/medical-terminology-mapper/data/terminology/loinc_core.sqlite
+2025-05-13 18:15:12 - app.standards.terminology.db_updater - INFO - Successfully imported 15 records into loinc database
+2025-05-13 18:15:12 - app.standards.terminology.db_updater - INFO - Sample loinc database created with 15 records
+2025-05-13 18:15:12 - app.standards.terminology.db_updater - INFO - Creating sample rxnorm database...
+2025-05-13 18:15:12 - app.standards.terminology.db_updater - INFO - Created empty rxnorm database at /Users/brandonkenney/Projects/medical-terminology-mapper/data/terminology/rxnorm_core.sqlite
+2025-05-13 18:15:12 - app.standards.terminology.db_updater - INFO - Successfully imported 15 records into rxnorm database
+2025-05-13 18:15:12 - app.standards.terminology.db_updater - INFO - Sample rxnorm database created with 15 records
+2025-05-13 18:15:12 - app.standards.terminology.db_updater - INFO - Sample databases creation completed
+2025-05-13 18:15:12 - setup_terminology_db - INFO - Sample databases created successfully
+2025-05-13 18:15:49 - root - INFO - Logger initialized
+2025-05-13 18:15:49 - app - INFO - Initializing Medical Terminology Mapper application
+2025-05-13 18:15:49 - app.standards.terminology.embedded_db - INFO - Connecting to snomed database at /Users/brandonkenney/Projects/medical-terminology-mapper/data/terminology/snomed_core.sqlite
+2025-05-13 18:15:49 - app.standards.terminology.embedded_db - INFO - Connecting to loinc database at /Users/brandonkenney/Projects/medical-terminology-mapper/data/terminology/loinc_core.sqlite
+2025-05-13 18:15:49 - app.standards.terminology.embedded_db - INFO - Connecting to rxnorm database at /Users/brandonkenney/Projects/medical-terminology-mapper/data/terminology/rxnorm_core.sqlite
+2025-05-13 18:15:49 - app.standards.terminology.embedded_db - INFO - Loaded 6 custom mappings
+2025-05-13 18:21:00 - root - INFO - Logger initialized
+2025-05-13 18:21:00 - app - INFO - Initializing Medical Terminology Mapper application
+2025-05-13 18:21:02 - main - INFO - Starting Medical Terminology Mapper
+2025-05-13 18:21:02 - main - INFO - Initializing Medical Terminology Mapper components
+2025-05-13 18:21:02 - app.models.model_loader - INFO - Using device: cpu
+2025-05-13 18:21:02 - app.models.model_loader - INFO - Initializing model from /Users/brandonkenney/Projects/medical-terminology-mapper/app/models/biobert_model
+2025-05-13 18:21:02 - app.models.model_loader - INFO - Loaded model config: {'model_type': 'biobert', 'name': 'dmis-lab/biobert-base-cased-v1.2', 'version': 'v1.0', 'entity_types': ['CONDITION', 'MEDICATION', 'PROCEDURE', 'LAB_TEST', 'OBSERVATION'], 'description': 'BioBERT model adapted for medical terminology mapping'}
+2025-05-13 18:21:02 - app.models.model_loader - INFO - Loaded 11 entity labels
+2025-05-13 18:21:08 - app.models.model_loader - INFO - Offline mode is enabled, using dummy implementation
+2025-05-13 18:21:08 - app.models.model_loader - INFO - Setting NER model to evaluation mode
+2025-05-13 18:21:08 - app.models.model_loader - INFO - Models initialized successfully
+2025-05-13 18:21:08 - main - INFO - BioBERT model initialized successfully
+2025-05-13 18:21:08 - app.standards.terminology.embedded_db - INFO - Connecting to snomed database at /Users/brandonkenney/Projects/medical-terminology-mapper/data/terminology/snomed_core.sqlite
+2025-05-13 18:21:08 - app.standards.terminology.embedded_db - INFO - Connecting to loinc database at /Users/brandonkenney/Projects/medical-terminology-mapper/data/terminology/loinc_core.sqlite
+2025-05-13 18:21:08 - app.standards.terminology.embedded_db - INFO - Connecting to rxnorm database at /Users/brandonkenney/Projects/medical-terminology-mapper/data/terminology/rxnorm_core.sqlite
+2025-05-13 18:21:08 - app.standards.terminology.embedded_db - INFO - Loaded 6 custom mappings
+2025-05-13 18:21:08 - main - INFO - Connected to terminology databases
+2025-05-13 18:21:08 - main - INFO - SNOMED concepts: 15
+2025-05-13 18:21:08 - main - INFO - LOINC concepts: 15
+2025-05-13 18:21:08 - main - INFO - RxNorm concepts: 15
+2025-05-13 18:21:08 - main - INFO - Custom mappings: 6
+2025-05-13 18:21:08 - app.models.model_loader - INFO - Cleaning up model resources
+2025-05-13 18:21:08 - main - ERROR - Component initialization failed
+2025-05-13 18:21:38 - root - INFO - Logger initialized
+2025-05-13 18:21:38 - app - INFO - Initializing Medical Terminology Mapper application
+2025-05-13 18:21:38 - test_db_only - INFO - Initializing database manager
+2025-05-13 18:21:38 - app.standards.terminology.embedded_db - INFO - Connecting to snomed database at /Users/brandonkenney/Projects/medical-terminology-mapper/data/terminology/snomed_core.sqlite
+2025-05-13 18:21:38 - app.standards.terminology.embedded_db - INFO - Connecting to loinc database at /Users/brandonkenney/Projects/medical-terminology-mapper/data/terminology/loinc_core.sqlite
+2025-05-13 18:21:38 - app.standards.terminology.embedded_db - INFO - Connecting to rxnorm database at /Users/brandonkenney/Projects/medical-terminology-mapper/data/terminology/rxnorm_core.sqlite
+2025-05-13 18:21:38 - app.standards.terminology.embedded_db - INFO - Loaded 6 custom mappings
+2025-05-13 18:21:38 - test_db_only - INFO - Connected to terminology databases
+2025-05-13 18:21:38 - test_db_only - INFO - Database connections closed

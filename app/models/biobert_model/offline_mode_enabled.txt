@@ -1,0 +1,5 @@
+This file enables offline mode with dummy model implementations.
+Delete this file to attempt loading the actual model.
+
+In offline mode, the system will use pattern-based and rule-based approaches 
+for terminology recognition and mapping instead of the BioBERT model.
