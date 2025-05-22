@@ -19,7 +19,11 @@ from app.models.preprocessing import (
 )
 from app.extractors.term_cache import get_term_cache
 from app.extractors.regex_patterns import get_patterns_by_type, get_all_patterns
-from app.extractors.terminology_mapper import TerminologyMapper
+# Import compatibility layer for terminology mapper
+try:
+    from app.extractors.terminology_mapper_compat import TerminologyMapper
+except ImportError:
+    from app.extractors.terminology_mapper import TerminologyMapper
 
 # Set up logging
 logger = logging.getLogger(__name__)

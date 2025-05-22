@@ -1,44 +1,5 @@
 {
-  "snomed": {
-    "hypertension": {
-      "code": "38341003",
-      "display": "Hypertension (disorder)",
-      "system": "http://snomed.info/sct",
-      "found": true
-    },
-    "diabetes mellitus": {
-      "code": "73211009",
-      "display": "Diabetes mellitus (disorder)",
-      "system": "http://snomed.info/sct",
-      "found": true
-    }
-  },
-  "loinc": {
-    "hemoglobin a1c": {
-      "code": "4548-4",
-      "display": "Hemoglobin A1c/Hemoglobin.total in Blood",
-      "system": "http://loinc.org",
-      "found": true
-    },
-    "blood glucose": {
-      "code": "2339-0",
-      "display": "Glucose [Mass/volume] in Blood",
-      "system": "http://loinc.org",
-      "found": true
-    }
-  },
-  "rxnorm": {
-    "metformin": {
-      "code": "6809",
-      "display": "metformin",
-      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-      "found": true
-    },
-    "lisinopril": {
-      "code": "29046",
-      "display": "lisinopril",
-      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-      "found": true
-    }
-  }
+  "snomed": {},
+  "loinc": {},
+  "rxnorm": {}
 }
