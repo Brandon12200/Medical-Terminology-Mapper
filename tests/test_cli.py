@@ -68,7 +68,9 @@ def test_single_term_mapping():
         })
         print(f"Result: {'PASS' if passed else 'FAIL'}")
     
-    return results
+    # Assert all tests passed
+    failed_tests = [test for test in results if not test["passed"]]
+    assert len(failed_tests) == 0, f"Failed tests: {[test['name'] for test in failed_tests]}"
 
 def test_batch_processing():
     """Test batch processing functionality."""
@@ -112,7 +114,9 @@ def test_batch_processing():
         })
         print(f"Result: {'PASS' if passed else 'FAIL'}")
     
-    return results
+    # Assert all tests passed
+    failed_tests = [test for test in results if not test["passed"]]
+    assert len(failed_tests) == 0, f"Failed tests: {[test['name'] for test in failed_tests]}"
 
 def check_json_results(file_path: str) -> bool:
     """Check if JSON results file contains valid data."""
@@ -165,7 +169,9 @@ def test_output_formats():
         })
         print(f"Result: {'PASS' if passed else 'FAIL'}")
     
-    return results
+    # Assert all tests passed
+    failed_tests = [test for test in results if not test["passed"]]
+    assert len(failed_tests) == 0, f"Failed tests: {[test['name'] for test in failed_tests]}"
 
 def check_json_file(file_path: str) -> bool:
     """Check if a file contains valid JSON."""

@@ -1,6 +1,7 @@
 # Planning/Documentation files
 *.md
 !README.md
+CLAUDE.md
 
 # IDE files
 .idea/
@@ -11,11 +12,41 @@
 .DS_Store
 .Thumbs.db
 
-# Node.js
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.pyc
+
+# Logs
+logs/
+*.log
+
+# Databases
+*.sqlite
+*.db
+
+# Cache
+app/cache/
+.cache/
+*.cache
+
+# Test artifacts
+tests/test_data/
+tests/logs/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Node.js (if still needed)
 node_modules/
 npm-debug.log
 yarn-error.log
 yarn-debug.log
+package-lock.json
+yarn.lock
 
 # Build artifacts
 /dist/
@@ -33,4 +64,18 @@ yarn-debug.log
 *.yaml
 *.yml
 !API_SPECIFICATION.yaml
+
+# TypeScript/JavaScript config files
+tsconfig.json
+jest.config.js
+package.json
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+
+# Demo files (optional - uncomment if you don't want to track demos)
+# demo_*.py
+
 **/.claude/settings.local.json

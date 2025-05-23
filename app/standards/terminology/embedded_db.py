@@ -841,6 +841,91 @@ class EmbeddedDatabaseManager:
         
         return None
     
+    def _try_common_lab_patterns(self, cursor, term: str) -> Optional[Dict[str, Any]]:
+        """
+        Try common laboratory test patterns for enhanced LOINC matching.
+        
+        Args:
+            cursor: Database cursor for LOINC database
+            term: The term to match
+            
+        Returns:
+            Dictionary with mapping information or None if not found
+        """
+        term_lower = term.lower().strip()
+        
+        # Pattern 1: "component in specimen" pattern (e.g., "glucose in blood")
+        if " in " in term_lower:
+            parts = term_lower.split(" in ")
+            if len(parts) == 2:
+                component = parts[0].strip()
+                specimen = parts[1].strip()
+                
+                # Try to find matches with this pattern
+                cursor.execute("""
+                    SELECT code, display, component, property, time, system, scale, method, long_common_name
+                    FROM loinc_concepts 
+                    WHERE LOWER(component) LIKE ? AND LOWER(system) LIKE ?
+                    LIMIT 1
+                """, (f"%{component}%", f"%{specimen}%"))
+                
+                result = cursor.fetchone()
+                if result:
+                    return {
+                        "code": result[0],
+                        "display": result[1],
+                        "component": result[2],
+                        "property": result[3],
+                        "time": result[4],
+                        "system": "http://loinc.org",
+                        "specimen": result[5],
+                        "scale": result[6],
+                        "method": result[7],
+                        "long_common_name": result[8] if result[8] else result[1],
+                        "found": True,
+                        "match_type": "specimen_pattern",
+                        "confidence": 0.85
+                    }
+        
+        # Pattern 2: Common component matching (e.g., "cholesterol" -> cholesterol tests)
+        common_components = {
+            "cholesterol": "2093-3",  # Cholesterol [Mass/volume] in Serum or Plasma
+            "glucose": "2339-0",      # Glucose [Mass/volume] in Blood
+            "potassium": "2823-3",    # Potassium [Moles/volume] in Serum or Plasma
+            "sodium": "2951-2",       # Sodium [Moles/volume] in Serum or Plasma
+            "hemoglobin": "718-7",    # Hemoglobin [Mass/volume] in Blood
+            "hematocrit": "4544-3",   # Hematocrit [Volume Fraction] of Blood
+            "creatinine": "2160-0"    # Creatinine [Mass/volume] in Serum or Plasma
+        }
+        
+        if term_lower in common_components:
+            code = common_components[term_lower]
+            cursor.execute("""
+                SELECT code, display, component, property, time, system, scale, method, long_common_name
+                FROM loinc_concepts 
+                WHERE code = ?
+            """, (code,))
+            
+            result = cursor.fetchone()
+            if result:
+                return {
+                    "code": result[0],
+                    "display": result[1],
+                    "component": result[2],
+                    "property": result[3],
+                    "time": result[4],
+                    "system": "http://loinc.org",
+                    "specimen": result[5],
+                    "scale": result[6],
+                    "method": result[7],
+                    "long_common_name": result[8] if result[8] else result[1],
+                    "found": True,
+                    "match_type": "common_component",
+                    "confidence": 0.9
+                }
+        
+        return None
+    
     def _normalize_lab_term(self, term: str) -> str:
         """
         Normalize a laboratory test name for better matching.

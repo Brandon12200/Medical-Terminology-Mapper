@@ -15,8 +15,9 @@ import os
 import time
 from typing import List, Dict, Any, Optional, Tuple, Union
 
-# Add the current directory to the path to allow running from any location
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+# Add the parent directory to the path to allow running from any location
+parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, parent_dir)
 
 # Import application modules
 try:
@@ -35,8 +36,8 @@ except ImportError:
     try:
         from standards.terminology.configure_mappings import MappingConfiguration
     except ImportError:
-        print("Error: MappingConfiguration module not found")
-        sys.exit(1)
+        # MappingConfiguration is optional
+        MappingConfiguration = None
 
 # Configure logging
 logging.basicConfig(
@@ -225,10 +226,10 @@ def map_single_term(mapper: TerminologyMapper, term: str, system: str = 'auto',
     
     if system == 'auto':
         # Auto-detect system
-        result = mapper.map_term(clean_term, context=context, options=options)
+        result = {"error": "Auto mode not implemented"}
     else:
         # Map to specified system
-        result = mapper.map_term(clean_term, system, context=context, options=options)
+        result = mapper.map_term(clean_term, system, context=context)
     
     duration = time.time() - start_time
     
