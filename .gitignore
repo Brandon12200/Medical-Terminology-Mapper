@@ -1,81 +1,100 @@
-# Planning/Documentation files
+# Documentation (ignore all .md files except main README.md)
 *.md
 !README.md
-CLAUDE.md
 
-# IDE files
-.idea/
-.vscode/
-*.sublime-*
-
-# OS files
-.DS_Store
-.Thumbs.db
-
-# Python
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
-*.so
-.Python
-*.pyc
 
-# Logs
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv/
+backend/venv/
+
+# Node modules
+frontend/node_modules/
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Project specific
 logs/
 *.log
-
-# Databases
-*.sqlite
-*.db
-
-# Cache
-app/cache/
 .cache/
-*.cache
+*.db
+*.sqlite
+*.sqlite-journal
+*.sqlite-wal
+temp/
+tmp/
 
-# Test artifacts
-tests/test_data/
-tests/logs/
-.pytest_cache/
-.coverage
-htmlcov/
+# Data files (keep sample data)
+data/terminology/*.csv
+!data/terminology/sample_data/
 
-# Node.js (if still needed)
-node_modules/
-npm-debug.log
-yarn-error.log
-yarn-debug.log
-package-lock.json
-yarn.lock
-
-# Build artifacts
-/dist/
-/build/
-/out/
+# Results
+results/
+uploads/
 
 # Environment variables
 .env
 .env.local
-.env.development.local
-.env.test.local
-.env.production.local
+backend/.env
+frontend/.env
+frontend/.env.local
 
-# YAML files
-*.yaml
-*.yml
-!API_SPECIFICATION.yaml
+# Frontend build
+frontend/dist/
+frontend/build/
+frontend/.vite/
 
-# TypeScript/JavaScript config files
-tsconfig.json
-jest.config.js
-package.json
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+coverage/
+*.cover
+frontend/coverage/
 
-# Temporary files
-*.tmp
-*.temp
-*.bak
+# OS files
+Thumbs.db
 
-# Demo files (optional - uncomment if you don't want to track demos)
-# demo_*.py
+# Python cache
+backend/.pytest_cache/
+backend/htmlcov/
+backend/.coverage
 
-**/.claude/settings.local.json
+# Logs
+backend/logs/
+frontend/logs/
+*.log

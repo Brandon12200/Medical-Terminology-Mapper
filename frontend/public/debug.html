@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Test</title>
+</head>
+<body>
+    <h1>Debug Test Page</h1>
+    <div id="test-root">Test root element exists</div>
+    <script>
+        console.log('Debug page loaded');
+        
+        // Test if we can fetch the API
+        fetch('http://localhost:8000/api/v1/health')
+            .then(res => res.json())
+            .then(data => console.log('API Health:', data))
+            .catch(err => console.error('API Error:', err));
+            
+        // Test if React dependencies load
+        import('/node_modules/.vite/deps/react.js?v=f2767b46')
+            .then(module => console.log('React loaded:', module))
+            .catch(err => console.error('React load error:', err));
+    </script>
+</body>
+</html>
