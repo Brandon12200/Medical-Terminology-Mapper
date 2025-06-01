@@ -9,22 +9,22 @@ A full-stack healthcare interoperability platform that intelligently maps medica
 ![Docker](https://img.shields.io/badge/Docker-Ready-2496ED)
 ![Coverage](https://img.shields.io/badge/Coverage-90%25-green)
 
-## 🎯 Overview
+## Overview
 
 Medical Terminology Mapper solves the critical healthcare challenge of terminology standardization across different systems. It provides intelligent mapping between various medical coding standards with confidence scoring, context awareness, and fuzzy matching capabilities.
 
 ### Key Features
 
-- **🔍 Intelligent Mapping**: Advanced algorithms map terms across SNOMED CT, LOINC, RxNorm, and ICD-10
-- **🧠 Context-Aware**: Considers clinical context for improved accuracy
-- **📊 Confidence Scoring**: Visual confidence indicators for all mappings
-- **🚀 High Performance**: Optimized fuzzy matching with multiple algorithms
-- **📦 Batch Processing**: Upload CSV files for bulk term mapping
-- **🌐 Modern Web UI**: React-based frontend with real-time results
-- **🔌 REST API**: Well-documented API for system integration
-- **🐳 Docker Ready**: Full containerization with one-command startup
+- **Intelligent Mapping**: Advanced algorithms map terms across SNOMED CT, LOINC, RxNorm, and ICD-10
+- **Context-Aware**: Considers clinical context for improved accuracy
+- **Confidence Scoring**: Visual confidence indicators for all mappings
+- **High Performance**: Optimized fuzzy matching with multiple algorithms
+- **Batch Processing**: Upload CSV files for bulk term mapping
+- **Modern Web UI**: React-based frontend with real-time results
+- **REST API**: Well-documented API for system integration
+- **Docker Ready**: Full containerization with one-command startup
 
-## 🖥️ Live Demo
+## Live Demo
 
 ```bash
 # Quick start with Docker
@@ -35,7 +35,7 @@ This opens:
 - Frontend: http://localhost:3000
 - API Docs: http://localhost:8000/docs
 
-## 🛠️ Technology Stack
+## Technology Stack
 
 ### Backend
 - **Python 3.12** with **FastAPI** for high-performance async API
@@ -56,7 +56,7 @@ This opens:
 - **Nginx** for production deployment
 - **GitHub Actions** ready for CI/CD
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 - Python 3.12+
@@ -103,7 +103,7 @@ npm install
 npm run dev
 ```
 
-## 📚 API Documentation
+## API Documentation
 
 Interactive API documentation is available at http://localhost:8000/docs
 
@@ -125,7 +125,7 @@ print(response.json())
 
 See [API Examples](docs/API_EXAMPLES.md) for comprehensive usage.
 
-## 🧪 Testing
+## Testing
 
 The project maintains >90% test coverage:
 
@@ -140,14 +140,14 @@ cd frontend && npm test
 cd backend && pytest tests/integration/
 ```
 
-## 📊 Performance
+## Performance
 
 - **Response Time**: <50ms for single term mapping
 - **Batch Processing**: 1000+ terms/minute
 - **Fuzzy Match Accuracy**: 95%+ with context
 - **Memory Efficient**: Optimized caching and indexing
 
-## 🏗️ Architecture
+## Architecture
 
 ```
 ┌─────────────────┐     ┌─────────────────┐
@@ -168,7 +168,7 @@ cd backend && pytest tests/integration/
          └─────────────────────┘
 ```
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 medical-terminology-mapper/
@@ -208,19 +208,3 @@ medical-terminology-mapper/
 ├── stop-dev.sh               # Stop development
 └── check-health.sh           # Health check script
 ```
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📈 Roadmap
-
-- [ ] Additional terminology systems (CPT, HCPCS)
-- [ ] Machine learning model improvements
-- [ ] Real-time collaborative mapping
-- [ ] FHIR server integration
-- [ ] Multi-language support
