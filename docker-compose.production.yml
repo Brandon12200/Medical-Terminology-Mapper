@@ -1,0 +1,380 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database with High Availability
+  postgres-primary:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: medical_db
+      POSTGRES_USER: medical_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_REPLICATION_MODE: master
+      POSTGRES_REPLICATION_USER: replicator
+      POSTGRES_REPLICATION_PASSWORD: ${REPLICATION_PASSWORD}
+    volumes:
+      - postgres_primary_data:/var/lib/postgresql/data
+      - ./scripts/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - medical_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U medical_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres-replica:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_REPLICATION_MODE: slave
+      POSTGRES_MASTER_SERVICE: postgres-primary
+      POSTGRES_REPLICATION_USER: replicator
+      POSTGRES_REPLICATION_PASSWORD: ${REPLICATION_PASSWORD}
+    volumes:
+      - postgres_replica_data:/var/lib/postgresql/data
+    networks:
+      - medical_network
+    depends_on:
+      postgres-primary:
+        condition: service_healthy
+
+  # Redis Cluster for Caching and Session Management
+  redis-master:
+    image: redis:7-alpine
+    command: redis-server --requirepass ${REDIS_PASSWORD} --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - medical_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--auth", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis-sentinel:
+    image: redis:7-alpine
+    command: redis-sentinel /etc/redis-sentinel/sentinel.conf
+    volumes:
+      - ./config/redis/sentinel.conf:/etc/redis-sentinel/sentinel.conf
+    networks:
+      - medical_network
+    depends_on:
+      - redis-master
+
+  # Kafka for Stream Processing
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    volumes:
+      - zookeeper_data:/var/lib/zookeeper/data
+      - zookeeper_logs:/var/lib/zookeeper/log
+    networks:
+      - medical_network
+
+  kafka-1:
+    image: confluentinc/cp-kafka:7.5.0
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-1:9092,EXTERNAL://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 2
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'false'
+      KAFKA_LOG_RETENTION_HOURS: 168
+      KAFKA_LOG_SEGMENT_BYTES: 1073741824
+      KAFKA_COMPRESSION_TYPE: gzip
+    volumes:
+      - kafka1_data:/var/lib/kafka/data
+    networks:
+      - medical_network
+    healthcheck:
+      test: kafka-topics --bootstrap-server localhost:9092 --list
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  kafka-2:
+    image: confluentinc/cp-kafka:7.5.0
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 2
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-2:9092,EXTERNAL://localhost:29093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 2
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'false'
+      KAFKA_LOG_RETENTION_HOURS: 168
+      KAFKA_LOG_SEGMENT_BYTES: 1073741824
+      KAFKA_COMPRESSION_TYPE: gzip
+    volumes:
+      - kafka2_data:/var/lib/kafka/data
+    networks:
+      - medical_network
+
+  # Schema Registry for Kafka
+  schema-registry:
+    image: confluentinc/cp-schema-registry:7.5.0
+    depends_on:
+      - kafka-1
+      - kafka-2
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: kafka-1:9092,kafka-2:9092
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+    networks:
+      - medical_network
+
+  # Medical Terminology API - Multiple Instances
+  api-1:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.production
+    environment:
+      DATABASE_URL: postgresql://medical_user:${POSTGRES_PASSWORD}@postgres-primary:5432/medical_db
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis-master:6379
+      KAFKA_BROKERS: kafka-1:9092,kafka-2:9092
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      SENTRY_DSN: ${SENTRY_DSN}
+      ENVIRONMENT: production
+      WORKER_ID: 1
+    volumes:
+      - ./backend/data:/app/data
+      - model_cache:/app/models
+    networks:
+      - medical_network
+    depends_on:
+      postgres-primary:
+        condition: service_healthy
+      redis-master:
+        condition: service_healthy
+      kafka-1:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+        reservations:
+          cpus: '1'
+          memory: 2G
+
+  api-2:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.production
+    environment:
+      DATABASE_URL: postgresql://medical_user:${POSTGRES_PASSWORD}@postgres-primary:5432/medical_db
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis-master:6379
+      KAFKA_BROKERS: kafka-1:9092,kafka-2:9092
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      SENTRY_DSN: ${SENTRY_DSN}
+      ENVIRONMENT: production
+      WORKER_ID: 2
+    volumes:
+      - ./backend/data:/app/data
+      - model_cache:/app/models
+    networks:
+      - medical_network
+    depends_on:
+      postgres-primary:
+        condition: service_healthy
+      redis-master:
+        condition: service_healthy
+      kafka-1:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+        reservations:
+          cpus: '1'
+          memory: 2G
+
+  # Stream Processor Workers
+  stream-processor-1:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.stream-processor
+    environment:
+      DATABASE_URL: postgresql://medical_user:${POSTGRES_PASSWORD}@postgres-primary:5432/medical_db
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis-master:6379
+      KAFKA_BROKERS: kafka-1:9092,kafka-2:9092
+      WORKER_ID: stream-1
+      CONSUMER_GROUP: medical-processor-group
+    volumes:
+      - ./backend/data:/app/data
+      - model_cache:/app/models
+    networks:
+      - medical_network
+    depends_on:
+      - api-1
+      - kafka-1
+      - kafka-2
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+
+  # NGINX Load Balancer with SSL
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "443:443"
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.production.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+      - nginx_cache:/var/cache/nginx
+    networks:
+      - medical_network
+    depends_on:
+      - api-1
+      - api-2
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Prometheus for Monitoring
+  prometheus:
+    image: prom/prometheus:latest
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    networks:
+      - medical_network
+    ports:
+      - "9090:9090"
+
+  # Grafana for Visualization
+  grafana:
+    image: grafana/grafana:latest
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD}
+      GF_SERVER_ROOT_URL: https://monitoring.your-domain.com
+    volumes:
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+      - grafana_data:/var/lib/grafana
+    networks:
+      - medical_network
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+
+  # Elasticsearch for Logging
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+      - xpack.security.enabled=true
+      - xpack.security.authc.api_key.enabled=true
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - medical_network
+    ports:
+      - "9200:9200"
+
+  # Kibana for Log Analysis
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.11.0
+    environment:
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+      ELASTICSEARCH_USERNAME: elastic
+      ELASTICSEARCH_PASSWORD: ${ELASTIC_PASSWORD}
+    networks:
+      - medical_network
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+
+  # Logstash for Log Processing
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.11.0
+    volumes:
+      - ./monitoring/logstash/pipeline:/usr/share/logstash/pipeline
+      - ./monitoring/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml
+    networks:
+      - medical_network
+    depends_on:
+      - elasticsearch
+
+  # Backup Service
+  backup:
+    build:
+      context: ./backup
+      dockerfile: Dockerfile
+    environment:
+      POSTGRES_HOST: postgres-primary
+      POSTGRES_DB: medical_db
+      POSTGRES_USER: medical_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      S3_BUCKET: ${BACKUP_S3_BUCKET}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+    volumes:
+      - backup_data:/backup
+    networks:
+      - medical_network
+    depends_on:
+      - postgres-primary
+
+networks:
+  medical_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+
+volumes:
+  postgres_primary_data:
+  postgres_replica_data:
+  redis_data:
+  zookeeper_data:
+  zookeeper_logs:
+  kafka1_data:
+  kafka2_data:
+  model_cache:
+  nginx_cache:
+  prometheus_data:
+  grafana_data:
+  elasticsearch_data:
+  backup_data:

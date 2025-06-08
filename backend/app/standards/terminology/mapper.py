@@ -46,7 +46,11 @@ class TerminologyMapper:
         """Setup external services."""
         if self.config.get("use_external_services", False):
             try:
-                logger.info("External terminology services not implemented in this phase")
+                from app.standards.terminology.api_services import TerminologyAPIService
+                self.external_service = TerminologyAPIService(
+                    cache_dir=self.config.get("api_cache_dir", "app/cache/api_cache")
+                )
+                logger.info("External API services initialized")
             except ImportError as e:
                 logger.warning(f"External terminology service dependencies not available: {e}")
     
@@ -266,8 +270,7 @@ class TerminologyMapper:
             
             # Initialize external services if available
             external_success = True
-            if self.external_service:
-                external_success = self.external_service.initialize()
+            # External service doesn't need initialization - it's ready to use
             
             # Share synonyms with the fuzzy matcher
             if self.fuzzy_matcher:
@@ -363,7 +366,24 @@ class TerminologyMapper:
                     fuzzy_result = self._apply_context_enhancement(clean_term, fuzzy_result, context, "condition")
                 return fuzzy_result
                 
-        # 3. Return not found with the original term
+        # 3. Try external API if available
+        if self.external_service and self.config.get("use_external_services", False):
+            try:
+                api_results = self.external_service.search_snomed_browser(clean_term)
+                if api_results:
+                    # Take the first result
+                    result = api_results[0]
+                    result['match_type'] = 'api'
+                    result['confidence'] = 0.8
+                    logger.debug(f"Found SNOMED API match for '{term}': {result['code']}")
+                    # Apply context enhancement
+                    if context:
+                        result = self._apply_context_enhancement(clean_term, result, context)
+                    return result
+            except Exception as e:
+                logger.warning(f"External SNOMED API error: {e}")
+        
+        # 4. Return not found with the original term
         logger.debug(f"No SNOMED mapping found for '{term}'")
         return {
             "code": None, 
@@ -371,7 +391,8 @@ class TerminologyMapper:
             "system": "http://snomed.info/sct", 
             "found": False,
             "attempted_methods": ["exact", 
-                                 "fuzzy" if self.fuzzy_matcher else ""]
+                                 "fuzzy" if self.fuzzy_matcher else "",
+                                 "api" if self.external_service else ""]
         }
     
     def map_to_loinc(self, term: str, context: Optional[str] = None, include_details: bool = False) -> Dict[str, Any]:
@@ -478,7 +499,25 @@ class TerminologyMapper:
             except Exception as e:
                 logger.error(f"Error during advanced LOINC pattern matching: {e}")
                 
-        # 4. Return not found with the original term
+        # 4. Try external API if available
+        if self.external_service and self.config.get("use_external_services", False):
+            try:
+                api_results = self.external_service.search_clinical_tables(clean_term, 'loinc')
+                if api_results:
+                    # Take the first result
+                    result = api_results[0]
+                    result['match_type'] = 'api'
+                    result['confidence'] = 0.8
+                    result['found'] = True
+                    logger.debug(f"Found LOINC API match for '{term}': {result['code']}")
+                    # Apply context enhancement
+                    if context:
+                        result = self._apply_context_enhancement(clean_term, result, context, "lab_test")
+                    return result
+            except Exception as e:
+                logger.warning(f"External LOINC API error: {e}")
+        
+        # 5. Return not found with the original term
         logger.debug(f"No LOINC mapping found for '{term}'")
         return {
             "code": None, 
@@ -486,7 +525,8 @@ class TerminologyMapper:
             "system": "http://loinc.org", 
             "found": False,
             "attempted_methods": ["exact", "pattern", 
-                                 "fuzzy" if self.fuzzy_matcher else ""]
+                                 "fuzzy" if self.fuzzy_matcher else "",
+                                 "api" if self.external_service else ""]
         }
     
     def map_to_rxnorm(self, term: str, context: Optional[str] = None) -> Dict[str, Any]:
@@ -543,7 +583,30 @@ class TerminologyMapper:
                     fuzzy_result = self._apply_context_enhancement(clean_term, fuzzy_result, context, "medication")
                 return fuzzy_result
                 
-        # 3. Return not found with the original term
+        # 3. Try external API if available
+        if self.external_service and self.config.get("use_external_services", False):
+            try:
+                # Try RxNorm API first
+                api_results = self.external_service.search_rxnorm(clean_term)
+                if not api_results:
+                    # Fallback to Clinical Tables
+                    api_results = self.external_service.search_clinical_tables(clean_term, 'rxterms')
+                
+                if api_results:
+                    # Take the first result
+                    result = api_results[0]
+                    result['match_type'] = 'api'
+                    result['confidence'] = 0.8
+                    result['found'] = True
+                    logger.debug(f"Found RxNorm API match for '{term}': {result['code']}")
+                    # Apply context enhancement
+                    if context:
+                        result = self._apply_context_enhancement(clean_term, result, context, "medication")
+                    return result
+            except Exception as e:
+                logger.warning(f"External RxNorm API error: {e}")
+        
+        # 4. Return not found with the original term
         logger.debug(f"No RxNorm mapping found for '{term}'")
         return {
             "code": None, 
@@ -551,7 +614,8 @@ class TerminologyMapper:
             "system": "http://www.nlm.nih.gov/research/umls/rxnorm", 
             "found": False,
             "attempted_methods": ["exact", 
-                                 "fuzzy" if self.fuzzy_matcher else ""]
+                                 "fuzzy" if self.fuzzy_matcher else "",
+                                 "api" if self.external_service else ""]
         }
     
     def _normalize_term(self, term: str) -> str:

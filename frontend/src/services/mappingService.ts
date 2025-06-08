@@ -47,7 +47,28 @@ export interface TestFile {
 export const mappingService = {
   // Map a single term
   mapTerm: async (request: MappingRequest): Promise<MappingResponse> => {
-    const { data } = await api.post<MappingResponse>('/map', request);
+    const { data } = await api.post<any>('/map', request);
+    
+    // Transform backend response to match frontend expectations
+    // Backend returns: { term, results: { system: [...] }, ... }
+    // Frontend expects: { term, mappings: [...] }
+    if (data.results && typeof data.results === 'object') {
+      const mappings: any[] = [];
+      
+      // Flatten the results dictionary into a single array
+      Object.entries(data.results).forEach(([system, systemMappings]) => {
+        if (Array.isArray(systemMappings)) {
+          mappings.push(...systemMappings);
+        }
+      });
+      
+      return {
+        term: data.term,
+        mappings: mappings
+      };
+    }
+    
+    // If the response is already in the expected format, return as-is
     return data;
   },
 
@@ -71,8 +92,29 @@ export const mappingService = {
 
   // Get batch results
   getBatchResults: async (jobId: string): Promise<MappingResponse[]> => {
-    const { data } = await api.get<MappingResponse[]>(`/batch/result/${jobId}`);
-    return data;
+    const { data } = await api.get<any[]>(`/batch/result/${jobId}`);
+    
+    // Transform each result if needed
+    return data.map(item => {
+      if (item.results && typeof item.results === 'object') {
+        const mappings: any[] = [];
+        
+        // Flatten the results dictionary into a single array
+        Object.entries(item.results).forEach(([system, systemMappings]) => {
+          if (Array.isArray(systemMappings)) {
+            mappings.push(...systemMappings);
+          }
+        });
+        
+        return {
+          term: item.term,
+          mappings: mappings
+        };
+      }
+      
+      // If already in expected format, return as-is
+      return item;
+    });
   },
 
   // Upload file for batch processing

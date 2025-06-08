@@ -34,6 +34,10 @@ docker-compose rm -f
 echo "🔨 Building services..."
 docker-compose build
 
+# Run enhanced setup script inside the API container to configure APIs
+echo "🔧 Configuring terminology databases and APIs..."
+docker-compose run --rm api python scripts/setup_with_apis.py
+
 echo "🎬 Starting services..."
 docker-compose up -d
 
@@ -102,10 +106,18 @@ echo "  - Stop services: ./stop-dev.sh"
 echo "  - Rebuild: docker-compose build --no-cache"
 echo "  - Shell into API: docker-compose exec api bash"
 echo "  - Shell into Frontend: docker-compose exec frontend sh"
+echo "  - Test APIs: docker-compose exec api python test_api_services.py"
 echo ""
 
 if [ "$API_READY" = true ] && [ "$FRONTEND_READY" = true ]; then
     echo "🎉 Development environment is ready!"
+    echo ""
+    echo "🌐 External API Access:"
+    echo "  ✓ RxNorm API (100,000+ medications) - FREE"
+    echo "  ✓ Clinical Tables API (ICD-10, LOINC, SNOMED) - FREE"
+    echo "  ✓ SNOMED Browser API (350,000+ concepts) - FREE"
+    echo ""
+    echo "The mapper will automatically use these APIs when local lookups fail!"
 else
     echo "⚠️  Some services may still be starting. Check logs for details."
 fi
