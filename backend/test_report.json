@@ -1,0 +1,133 @@
+{
+  "timestamp": "2025-07-11T03:52:09.668424+00:00",
+  "summary": {
+    "total_tests": 14,
+    "passed": 12,
+    "failed": 2,
+    "warnings": 6,
+    "pass_rate": 85.71428571428571,
+    "status": "GOOD"
+  },
+  "details": [
+    {
+      "test": "TerminologyMapper Import",
+      "status": "PASS",
+      "message": "Successfully imported",
+      "details": {}
+    },
+    {
+      "test": "Document Models Import",
+      "status": "PASS",
+      "message": "Successfully imported",
+      "details": {}
+    },
+    {
+      "test": "Batch Models Import",
+      "status": "PASS",
+      "message": "Successfully imported",
+      "details": {}
+    },
+    {
+      "test": "Mapper Initialization",
+      "status": "PASS",
+      "message": "TerminologyMapper created successfully",
+      "details": {}
+    },
+    {
+      "test": "SNOMED Mapping",
+      "status": "PASS",
+      "message": "Found 5 diabetes mappings",
+      "details": {}
+    },
+    {
+      "test": "Terminology Mapping",
+      "status": "FAIL",
+      "message": "Mapping failed: 0",
+      "details": {}
+    },
+    {
+      "test": "Model Enums",
+      "status": "PASS",
+      "message": "All enums working correctly",
+      "details": {}
+    },
+    {
+      "test": "Document Response Model",
+      "status": "PASS",
+      "message": "Created successfully",
+      "details": {}
+    },
+    {
+      "test": "Batch Response Model",
+      "status": "PASS",
+      "message": "Created successfully",
+      "details": {}
+    },
+    {
+      "test": "Document Service",
+      "status": "FAIL",
+      "message": "Service test failed: failed to find libmagic.  Check your installation",
+      "details": {}
+    },
+    {
+      "test": "BioBERT Service Init",
+      "status": "PASS",
+      "message": "Service initialized successfully",
+      "details": {}
+    },
+    {
+      "test": "Entity Extraction",
+      "status": "PASS",
+      "message": "Extracted 1 entities",
+      "details": {}
+    },
+    {
+      "test": "Terminology Integration",
+      "status": "WARN",
+      "message": "No entities mapped",
+      "details": {}
+    },
+    {
+      "test": "API Model Serialization",
+      "status": "PASS",
+      "message": "Models serialize/deserialize correctly",
+      "details": {}
+    },
+    {
+      "test": "Configuration Loading",
+      "status": "WARN",
+      "message": "Configuration file not found",
+      "details": {}
+    },
+    {
+      "test": "Database Manager Init",
+      "status": "PASS",
+      "message": "Database manager created",
+      "details": {}
+    },
+    {
+      "test": "SNOMED Database",
+      "status": "WARN",
+      "message": "Connection issue: 'EmbeddedDatabaseManager' object has no attribute 'execute_query'",
+      "details": {}
+    },
+    {
+      "test": "LOINC Database",
+      "status": "WARN",
+      "message": "Connection issue: 'EmbeddedDatabaseManager' object has no attribute 'execute_query'",
+      "details": {}
+    },
+    {
+      "test": "RXNORM Database",
+      "status": "WARN",
+      "message": "Connection issue: 'EmbeddedDatabaseManager' object has no attribute 'execute_query'",
+      "details": {}
+    },
+    {
+      "test": "Database Connectivity",
+      "status": "WARN",
+      "message": "No databases connected",
+      "details": {}
+    }
+  ]
+}

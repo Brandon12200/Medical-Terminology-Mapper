@@ -19,13 +19,251 @@ from app.extractors.regex_patterns import get_patterns_by_type, get_all_patterns
 try:
     from app.extractors.terminology_mapper_compat import TerminologyMapper
 except ImportError:
-    from app.extractors.terminology_mapper import TerminologyMapper
+    try:
+        from app.standards.terminology.mapper import TerminologyMapper
+    except ImportError:
+        from app.extractors.terminology_mapper import TerminologyMapper
+
+# Import BioBERT service
+from app.ml.biobert import create_biobert_service, BioBERTService
 
 # Set up logging
 logger = logging.getLogger(__name__)
 
+class EnhancedTermExtractor:
+    """Enhanced term extractor using BioBERT service"""
+    
+    def __init__(self, 
+                 use_cache: bool = True,
+                 confidence_threshold: float = 0.7,
+                 use_terminology_mapping: bool = True):
+        """
+        Initialize enhanced term extractor
+        
+        Args:
+            use_cache: Whether to use term caching
+            confidence_threshold: Minimum confidence for terms
+            use_terminology_mapping: Whether to map to standard terminologies
+        """
+        self.use_cache = use_cache
+        self.confidence_threshold = confidence_threshold
+        self.use_terminology_mapping = use_terminology_mapping
+        
+        # Initialize terminology mapper if needed
+        self.terminology_mapper = None
+        if use_terminology_mapping:
+            try:
+                self.terminology_mapper = TerminologyMapper()
+            except Exception as e:
+                logger.warning(f"Failed to initialize terminology mapper: {e}")
+                self.use_terminology_mapping = False
+        
+        # Initialize BioBERT service
+        self.biobert_service = create_biobert_service(
+            use_regex_patterns=True,
+            use_ensemble=True,
+            confidence_threshold=confidence_threshold,
+            terminology_mapper=self.terminology_mapper
+        )
+        
+        # Initialize cache
+        self.cache = get_term_cache() if use_cache else None
+        
+        logger.info("Enhanced term extractor initialized")
+    
+    def extract_terms(self, 
+                     text: str, 
+                     threshold: Optional[float] = None,
+                     map_to_terminology: Optional[bool] = None,
+                     extract_context: bool = True) -> List[Dict[str, Any]]:
+        """
+        Extract medical terms from text
+        
+        Args:
+            text: Input text
+            threshold: Confidence threshold (overrides instance default)
+            map_to_terminology: Whether to map to terminologies (overrides default)
+            extract_context: Whether to extract surrounding context
+            
+        Returns:
+            List of extracted terms with metadata
+        """
+        # Use defaults if not specified
+        if threshold is None:
+            threshold = self.confidence_threshold
+        if map_to_terminology is None:
+            map_to_terminology = self.use_terminology_mapping
+        
+        # Validate input
+        if not text or not isinstance(text, str):
+            logger.warning("Invalid input text for term extraction")
+            return []
+        
+        start_time = time.time()
+        
+        try:
+            # Check cache first
+            if self.use_cache and self.cache:
+                cached_terms = self.cache.get(text, "biobert-enhanced", threshold)
+                if cached_terms:
+                    duration = time.time() - start_time
+                    logger.info(f"Retrieved {len(cached_terms)} terms from cache in {duration:.3f}s")
+                    return cached_terms
+            
+            # Extract entities using BioBERT service
+            entities = self.biobert_service.extract_entities(
+                text=text,
+                extract_context=extract_context,
+                map_to_terminologies=map_to_terminology
+            )
+            
+            # Convert to legacy format for compatibility
+            terms = []
+            for entity in entities:
+                term = {
+                    "text": entity.text,
+                    "normalized_text": entity.normalized_text,
+                    "type": entity.entity_type,
+                    "start": entity.start_position,
+                    "end": entity.end_position,
+                    "confidence": entity.confidence,
+                    "source": entity.source,
+                    "context": entity.context,
+                    "attributes": entity.attributes or {}
+                }
+                
+                # Add terminology mappings if available
+                if entity.terminology_mappings:
+                    term["terminology"] = {
+                        "mappings": entity.terminology_mappings,
+                        "mapped": True
+                    }
+                else:
+                    term["terminology"] = {"mapped": False}
+                
+                # Filter by confidence threshold
+                if entity.confidence >= threshold:
+                    terms.append(term)
+            
+            # Cache results
+            if self.use_cache and self.cache:
+                self.cache.set(text, "biobert-enhanced", threshold, terms)
+            
+            duration = time.time() - start_time
+            logger.info(f"Extracted {len(terms)} terms in {duration:.3f}s")
+            
+            return terms
+            
+        except Exception as e:
+            logger.error(f"Term extraction failed: {e}")
+            return []
+    
+    def extract_terms_batch(self, 
+                           texts: List[str],
+                           threshold: Optional[float] = None,
+                           batch_size: int = 8) -> List[List[Dict[str, Any]]]:
+        """
+        Extract terms from multiple texts efficiently
+        
+        Args:
+            texts: List of input texts
+            threshold: Confidence threshold
+            batch_size: Processing batch size
+            
+        Returns:
+            List of term lists for each input text
+        """
+        if threshold is None:
+            threshold = self.confidence_threshold
+        
+        start_time = time.time()
+        
+        try:
+            # Use BioBERT service batch processing
+            batch_results = self.biobert_service.extract_entities_batch(
+                texts=texts,
+                batch_size=batch_size
+            )
+            
+            # Convert to legacy format
+            all_terms = []
+            for entities in batch_results:
+                terms = []
+                for entity in entities:
+                    if entity.confidence >= threshold:
+                        term = {
+                            "text": entity.text,
+                            "normalized_text": entity.normalized_text,
+                            "type": entity.entity_type,
+                            "start": entity.start_position,
+                            "end": entity.end_position,
+                            "confidence": entity.confidence,
+                            "source": entity.source,
+                            "terminology": {
+                                "mappings": entity.terminology_mappings or {},
+                                "mapped": bool(entity.terminology_mappings)
+                            }
+                        }
+                        terms.append(term)
+                all_terms.append(terms)
+            
+            duration = time.time() - start_time
+            total_terms = sum(len(terms) for terms in all_terms)
+            logger.info(f"Batch extracted {total_terms} terms from {len(texts)} texts in {duration:.3f}s")
+            
+            return all_terms
+            
+        except Exception as e:
+            logger.error(f"Batch term extraction failed: {e}")
+            return [[] for _ in texts]
+    
+    def analyze_document(self, text: str) -> Dict[str, Any]:
+        """
+        Perform comprehensive document analysis
+        
+        Args:
+            text: Input document text
+            
+        Returns:
+            Analysis results including entities and statistics
+        """
+        try:
+            analysis = self.biobert_service.analyze_document(text)
+            
+            # Convert to legacy format
+            return {
+                "entities": [
+                    {
+                        "text": entity.text,
+                        "type": entity.entity_type,
+                        "start": entity.start_position,
+                        "end": entity.end_position,
+                        "confidence": entity.confidence,
+                        "source": entity.source,
+                        "terminology": {
+                            "mappings": entity.terminology_mappings or {},
+                            "mapped": bool(entity.terminology_mappings)
+                        }
+                    }
+                    for entity in analysis.entities
+                ],
+                "statistics": {
+                    "entity_summary": analysis.entity_summary,
+                    "processing_time": analysis.processing_time,
+                    "chunks_processed": analysis.chunks_processed,
+                    "extraction_methods": analysis.extraction_methods,
+                    "confidence_stats": analysis.confidence_stats,
+                    "total_entities": len(analysis.entities)
+                }
+            }
+            
+        except Exception as e:
+            logger.error(f"Document analysis failed: {e}")
+            return {"entities": [], "statistics": {}}
+
+
 class TermExtractor:
-    """Extracts medical terms from text using BioBERT NER."""
+    """Legacy term extractor - kept for backward compatibility"""
     
     def __init__(self, model_manager, use_cache=True, offline_mode=False, confidence_threshold=0.7, use_terminology=True):
         """Initialize the term extractor."""

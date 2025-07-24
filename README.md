@@ -1,210 +1,343 @@
 # Medical Terminology Mapper
 
-A full-stack healthcare interoperability platform that intelligently maps medical terms to standardized terminologies (SNOMED CT, LOINC, RxNorm, ICD-10) using advanced NLP and fuzzy matching algorithms.
+A comprehensive healthcare AI platform that combines BioBERT-powered medical entity extraction with intelligent terminology mapping to standardized medical vocabularies (SNOMED CT, LOINC, RxNorm).
 
-![Python](https://img.shields.io/badge/Python-3.12-blue)
+![Python](https://img.shields.io/badge/Python-3.11-blue)
 ![React](https://img.shields.io/badge/React-19-61DAFB)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.109-009688)
 ![Docker](https://img.shields.io/badge/Docker-Ready-2496ED)
-![Coverage](https://img.shields.io/badge/Coverage-90%25-green)
+![BioBERT](https://img.shields.io/badge/BioBERT-AI-brightgreen)
 
-## Overview
+## 🚀 Overview
 
-Medical Terminology Mapper solves the critical healthcare challenge of terminology standardization across different systems. It provides intelligent mapping between various medical coding standards with confidence scoring, context awareness, and fuzzy matching capabilities.
+This project provides an end-to-end solution for medical document processing and terminology standardization:
 
-### Key Features
+1. **Document Processing**: Upload medical documents (PDF, DOCX, TXT, RTF)
+2. **AI Entity Extraction**: BioBERT-powered extraction of medical entities
+3. **Terminology Mapping**: Intelligent mapping to SNOMED CT, LOINC, and RxNorm
+4. **Interactive Results**: Visual highlighting and confidence scoring
+5. **Batch Processing**: Multi-document workflows with progress monitoring
+6. **Export Options**: JSON, CSV, and Excel export formats
 
-- **Intelligent Mapping**: Advanced algorithms map terms across SNOMED CT, LOINC, RxNorm, and ICD-10
-- **Context-Aware**: Considers clinical context for improved accuracy
+## 🌟 Key Features
+
+### 📄 Document Processing
+- **Multi-format Support**: PDF, DOCX, DOC, TXT, RTF, HL7
+- **Text Extraction**: Apache Tika with fallbacks for robust extraction
+- **Batch Upload**: Process multiple documents simultaneously
+- **Progress Monitoring**: Real-time progress tracking with document-level status
+
+### 🤖 AI-Powered Entity Extraction
+- **BioBERT Integration**: State-of-the-art medical NLP model
+- **Entity Types**: Conditions, medications, procedures, tests, anatomy, dosages
+- **Confidence Scoring**: AI confidence calibration with temperature scaling
+- **Context Preservation**: Sliding window processing for large documents
+- **Negation Detection**: Identifies negated and uncertain entities
+
+### 🎯 Intelligent Terminology Mapping
+- **Multi-Standard Support**: SNOMED CT, LOINC, RxNorm
+- **Fuzzy Matching**: Multiple algorithms (phonetic, token-based, character-based)
+- **Context-Aware Enhancement**: Clinical context improves mapping accuracy
 - **Confidence Scoring**: Visual confidence indicators for all mappings
-- **High Performance**: Optimized fuzzy matching with multiple algorithms
-- **Batch Processing**: Upload CSV files for bulk term mapping
-- **Modern Web UI**: React-based frontend with real-time results
-- **REST API**: Well-documented API for system integration
-- **Docker Ready**: Full containerization with one-command startup
+- **Custom Mappings**: User-defined mapping rules
 
-## Live Demo
+### 🖥️ Modern Web Interface
+- **Interactive Entity Highlighting**: Color-coded entities with hover tooltips
+- **Real-time Progress Monitoring**: Live updates during batch processing
+- **Export Capabilities**: Download results in multiple formats
+- **Responsive Design**: Works on desktop and mobile devices
 
-```bash
-# Quick start with Docker
-./start-dev.sh
-```
+### 🔧 Developer-Friendly
+- **REST API**: Comprehensive API with OpenAPI documentation
+- **Docker Compose**: One-command deployment
+- **Background Processing**: Celery + Redis for scalable processing
+- **Health Monitoring**: Built-in health checks and monitoring
 
-This opens:
-- Frontend: http://localhost:3000
-- API Docs: http://localhost:8000/docs
+## 🚀 Quick Start
 
-## Technology Stack
-
-### Backend
-- **Python 3.12** with **FastAPI** for high-performance async API
-- **SQLite** databases with optimized indexing
-- **scikit-learn** & **RapidFuzz** for fuzzy matching
-- **BioBERT** for medical NLP
-- **Pydantic** for data validation
-
-### Frontend
-- **React 19** with **TypeScript** for type safety
-- **Vite** for lightning-fast development
-- **TailwindCSS** for modern UI
-- **TanStack Query** for efficient data fetching
-- **Vitest** for testing
-
-### Infrastructure
-- **Docker** & **Docker Compose** for containerization
-- **Nginx** for production deployment
-- **GitHub Actions** ready for CI/CD
-
-## Getting Started
-
-### Prerequisites
-- Python 3.12+
-- Node.js 18+
-- Docker (optional but recommended)
-
-### Quick Start with Docker
+### One-Command Startup (Recommended)
 
 ```bash
 # Clone the repository
 git clone https://github.com/yourusername/medical-terminology-mapper.git
 cd medical-terminology-mapper
 
-# Start everything with one command
-./start-dev.sh
+# Start the entire application
+./start.sh
+
+# Access the application at http://localhost:3000
+# API docs available at http://localhost:8000/docs
+
+# Initialize/reinitialize database (if needed)
+./start.sh --init-db
+
+# Stop the application
+./stop.sh
+
+# Stop with cleanup options
+./stop.sh basic    # Remove containers only
+./stop.sh volumes  # Remove containers and data volumes
+./stop.sh full     # Remove everything including images
 ```
 
-### Manual Setup
+### Manual Docker Compose
 
-#### Backend
 ```bash
-# Navigate to backend
-cd backend
+# Alternative: Manual Docker Compose control
+docker-compose up -d
 
-# Install dependencies
+# Wait for services to be healthy (~2-3 minutes)
+docker-compose logs -f
+
+# Stop services
+docker-compose down
+```
+
+### Option 2: Development Setup
+
+```bash
+# Backend setup
+cd backend
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 
-# Set up terminology databases
-python scripts/setup_terminology_db.py
+# Start Redis (required for background processing)
+redis-server
 
-# Start API server
-python run_api.py
-```
+# Start Celery worker
+celery -A celery_config worker --loglevel=info
 
-#### Frontend
-```bash
-# Navigate to frontend
+# Start backend API
+python -m uvicorn api.main:app --reload
+
+# Frontend setup (new terminal)
 cd frontend
-
-# Install dependencies
 npm install
-
-# Start development server
 npm run dev
+
+# Access the application
+open http://localhost:3000
 ```
 
-## API Documentation
+## 📖 Usage Guide
 
-Interactive API documentation is available at http://localhost:8000/docs
+### 1. Single Document Processing
 
-### Quick Examples
+1. Navigate to **Batch Document Processing**
+2. Upload medical documents (PDF, DOCX, TXT, RTF)
+3. Monitor processing progress in real-time
+4. View extracted entities with highlighting
+5. Export results in JSON, CSV, or Excel format
+
+### 2. Entity Extraction Results
+
+The system extracts and categorizes medical entities:
+
+- **🩺 Conditions**: Diseases, symptoms, diagnoses
+- **💊 Medications**: Drugs, dosages, frequencies  
+- **🔬 Tests**: Lab tests, procedures, observations
+- **🫀 Anatomy**: Body parts, organs, systems
+- **📊 Procedures**: Medical procedures, treatments
+
+### 3. Terminology Mappings
+
+Each entity is mapped to standard terminologies:
+
+- **SNOMED CT**: Clinical terms and concepts
+- **LOINC**: Laboratory and clinical observations
+- **RxNorm**: Medications and drug information
+
+### 4. Export Options
+
+Download processing results in multiple formats:
+
+- **JSON**: Complete structured data with metadata
+- **CSV**: Flattened data for analysis
+- **Excel**: Multi-sheet workbook with entities and mappings
+
+## 🏗️ Architecture
+
+```
+┌─────────────┐    ┌─────────────┐    ┌──────────────┐    ┌─────────────┐
+│  Document   │───▶│ Text        │───▶│ BioBERT      │───▶│ Terminology │
+│  Upload     │    │ Extraction  │    │ Extraction   │    │ Mapping     │
+└─────────────┘    └─────────────┘    └──────────────┘    └─────────────┘
+                                                                  │
+┌─────────────┐    ┌─────────────┐    ┌──────────────┐           │
+│ Web UI      │◀───│ Export      │◀───│ Results      │◀──────────┘
+│ (React)     │    │ Service     │    │ Processing   │
+└─────────────┘    └─────────────┘    └──────────────┘
+```
+
+### Technology Stack
+
+**Backend**:
+- FastAPI for REST API
+- BioBERT for medical entity extraction
+- Celery + Redis for background processing
+- SQLite for data storage
+- Apache Tika for document processing
+
+**Frontend**:
+- React 19 with TypeScript
+- Tailwind CSS for styling
+- React Query for state management
+- Vite for build tooling
+
+**Infrastructure**:
+- Docker & Docker Compose
+- Redis for caching and task queue
+- Nginx for production deployment
+
+## 📊 API Documentation
+
+### Key Endpoints
+
+```bash
+# Health check
+GET /health
+
+# Upload documents for batch processing
+POST /api/v1/documents/batch/upload
+
+# Monitor batch processing status
+GET /api/v1/documents/batch/{batch_id}/status
+
+# Get batch results
+GET /api/v1/documents/batch/{batch_id}/results
+
+# Export batch results
+GET /api/v1/documents/batch/{batch_id}/export/{format}
+
+# Single document entity extraction
+POST /api/v1/documents/{document_id}/extract-entities
+```
+
+### Interactive API Documentation
+
+Once running, access the interactive API documentation:
+- **Swagger UI**: http://localhost:8000/docs
+- **ReDoc**: http://localhost:8000/redoc
+
+## 🧪 Testing
+
+### Run Tests
+
+```bash
+# Backend tests
+cd backend
+pytest --cov=app --cov=api
+
+# Frontend tests  
+cd frontend
+npm test
+
+# Integration tests
+cd backend
+python -m pytest tests/test_comprehensive_integration.py
+```
+
+### Test Coverage
+
+The project maintains high test coverage:
+- **Backend**: 85%+ coverage including API endpoints, entity extraction, and terminology mapping
+- **Frontend**: 80%+ coverage for components and services
+- **Integration**: End-to-end workflow testing
+
+## 🚀 Deployment
+
+### Production Deployment
+
+```bash
+# Build and deploy with production settings
+docker-compose -f docker-compose.production.yml up -d
+
+# Scale services
+docker-compose up -d --scale celery-worker=3
+
+# Monitor with Flower
+open http://localhost:5555  # Celery task monitoring
+```
+
+### Environment Variables
+
+Key configuration options:
+
+```bash
+# Backend
+REDIS_URL=redis://localhost:6379/0
+LOG_LEVEL=INFO
+ENVIRONMENT=production
+
+# Frontend  
+REACT_APP_API_URL=http://localhost:8000
+```
+
+## 🔧 Configuration
+
+### Adding Custom Mappings
 
 ```python
-# Map a single term
-import requests
+# Add custom terminology mappings
+from app.standards.terminology.custom_mapping_rules import add_custom_mapping
 
-response = requests.post('http://localhost:8000/api/v1/map', json={
-    'term': 'diabetes mellitus type 2',
-    'systems': ['snomed', 'icd10'],
-    'context': 'endocrine disorder'
-})
-
-print(response.json())
-# Returns mapped codes with confidence scores
+add_custom_mapping(
+    term="MI",
+    target_system="snomed",
+    target_code="22298006",
+    confidence=0.95
+)
 ```
 
-See [API Examples](docs/API_EXAMPLES.md) for comprehensive usage.
+### Adjusting AI Model Settings
 
-## Testing
-
-The project maintains >90% test coverage:
-
-```bash
-# Run backend tests
-cd backend && pytest
-
-# Run frontend tests
-cd frontend && npm test
-
-# Run integration tests
-cd backend && pytest tests/integration/
+```python
+# Configure BioBERT model settings
+MODEL_CONFIG = {
+    "model_name": "dmis-lab/biobert-base-cased-v1.1",
+    "confidence_threshold": 0.7,
+    "max_length": 512,
+    "batch_size": 16
+}
 ```
 
-## Performance
+## 🤝 Contributing
 
-- **Response Time**: <50ms for single term mapping
-- **Batch Processing**: 1000+ terms/minute
-- **Fuzzy Match Accuracy**: 95%+ with context
-- **Memory Efficient**: Optimized caching and indexing
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-## Architecture
+### Development Guidelines
 
-```
-┌─────────────────┐     ┌─────────────────┐
-│   React UI      │────▶│   FastAPI       │
-└─────────────────┘     └────────┬────────┘
-                                 │
-                    ┌────────────┴────────────┐
-                    │                         │
-              ┌─────▼─────┐           ┌──────▼──────┐
-              │ Mapper     │           │ Fuzzy       │
-              │ Engine     │◀─────────▶│ Matcher     │
-              └─────┬─────┘           └─────────────┘
-                    │
-         ┌──────────┴──────────┐
-         │   SQLite DBs        │
-         │ (SNOMED, LOINC,     │
-         │  RxNorm, ICD-10)    │
-         └─────────────────────┘
-```
+- Follow PEP 8 for Python code
+- Use TypeScript for frontend components
+- Add tests for new functionality
+- Update documentation for API changes
 
-## Project Structure
+## 📄 License
 
-```
-medical-terminology-mapper/
-├── backend/                    # Backend application
-│   ├── api/                   # FastAPI application
-│   │   ├── v1/               # API version 1
-│   │   │   ├── models/       # Pydantic models
-│   │   │   ├── routers/      # API endpoints
-│   │   │   └── services/     # Business logic
-│   │   ├── config.py         # API configuration
-│   │   └── main.py           # FastAPI app
-│   ├── app/                   # Core application
-│   │   ├── extractors/       # Term extraction & NLP
-│   │   ├── models/           # ML models & loaders
-│   │   ├── standards/        # Standards implementation
-│   │   │   └── terminology/  # Terminology mappers
-│   │   └── utils/            # Utility functions
-│   ├── cli/                   # Command-line interface
-│   ├── tests/                 # Backend tests
-│   ├── scripts/               # Utility scripts
-│   └── requirements.txt       # Python dependencies
-├── frontend/                   # React application
-│   ├── src/                   # Source code
-│   │   ├── components/       # React components
-│   │   ├── pages/           # Page components
-│   │   ├── services/        # API services
-│   │   ├── types/           # TypeScript types
-│   │   └── utils/           # Utilities
-│   ├── public/               # Static assets
-│   └── package.json          # Node dependencies
-├── data/                      # Data files
-│   └── terminology/          # Terminology databases
-├── docs/                      # Documentation
-├── logs/                      # Application logs
-├── docker-compose.yml         # Docker orchestration
-├── start-dev.sh              # Start development
-├── stop-dev.sh               # Stop development
-└── check-health.sh           # Health check script
-```
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- **BioBERT**: Pre-trained biomedical language representation model
+- **SNOMED International**: SNOMED CT terminology
+- **LOINC**: Logical Observation Identifiers Names and Codes
+- **NLM**: RxNorm drug terminology
+- **Apache Tika**: Content analysis toolkit
+
+## 📞 Support
+
+For questions, issues, or contributions:
+
+- **GitHub Issues**: [Report bugs or request features](https://github.com/yourusername/medical-terminology-mapper/issues)
+- **Documentation**: [API Documentation](http://localhost:8000/docs)
+- **Email**: your.email@example.com
+
+---
+
+**Note**: This system is designed for research and development purposes. For production medical applications, please ensure compliance with relevant healthcare regulations (HIPAA, GDPR, etc.).

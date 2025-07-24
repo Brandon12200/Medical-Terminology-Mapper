@@ -2,18 +2,16 @@
 numpy==1.26.4
 pandas==2.2.2
 sqlalchemy==2.0.20
-transformers==4.36.2
-torch==2.2.2
 nltk==3.8.1
-scikit-learn==1.4.0
 scipy==1.10.1
 
-# ML and NLP requirements  
+# Essential ML requirements for Docker
+torch==2.2.2
+transformers==4.36.2
+scikit-learn==1.4.0
+
+# Core NLP requirements (minimal)
 spacy==3.6.1
-scispacy==0.5.3
-datasets==2.14.6
-tokenizers==0.15.0
-seqeval==1.2.2
 
 # Text extraction requirements
 PyPDF2==3.0.1

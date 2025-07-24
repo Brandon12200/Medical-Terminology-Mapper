@@ -1,0 +1,56 @@
+LABORATORY REPORT
+
+Patient: Maria Garcia
+DOB: 05/12/1955
+MRN: 789456123
+Provider: Dr. James Chen, MD
+Collection Date: 2024-01-20 08:30
+Report Date: 2024-01-20 14:45
+
+COMPREHENSIVE METABOLIC PANEL
+Test                    Result      Reference Range    Flag
+Glucose                 189         70-99 mg/dL        H
+BUN                     28          7-20 mg/dL         H
+Creatinine             1.8         0.6-1.2 mg/dL      H
+eGFR                   42          >60 mL/min/1.73m2  L
+Sodium                 138         136-145 mmol/L     
+Potassium              4.8         3.5-5.1 mmol/L     
+Chloride               102         98-107 mmol/L      
+CO2                    24          22-29 mmol/L       
+Calcium                9.2         8.5-10.5 mg/dL     
+Total Protein          7.1         6.3-8.2 g/dL       
+Albumin                3.8         3.5-5.0 g/dL       
+AST                    32          10-40 U/L          
+ALT                    28          10-40 U/L          
+Alkaline Phosphatase   85          44-147 U/L         
+
+LIPID PANEL
+Total Cholesterol      245         <200 mg/dL         H
+Triglycerides         312         <150 mg/dL         H
+HDL Cholesterol       38          >40 mg/dL          L
+LDL Cholesterol       145         <100 mg/dL         H
+Non-HDL Cholesterol   207         <130 mg/dL         H
+
+HEMOGLOBIN A1C
+HbA1c                 8.9%        <5.7%              H
+
+URINALYSIS
+Color                 Yellow      Yellow             
+Clarity               Clear       Clear              
+Specific Gravity      1.025       1.003-1.030        
+pH                    6.0         5.0-8.0            
+Protein               2+          Negative           A
+Glucose               3+          Negative           A
+Ketones               Negative    Negative           
+Blood                 Negative    Negative           
+Leukocyte Esterase    Negative    Negative           
+Nitrite               Negative    Negative           
+Microscopic:
+RBC                   0-2/hpf     0-2/hpf            
+WBC                   0-2/hpf     0-5/hpf            
+
+CLINICAL INTERPRETATION:
+1. Uncontrolled diabetes mellitus with glycosuria and proteinuria
+2. Chronic kidney disease suggested by elevated creatinine and reduced eGFR
+3. Dyslipidemia requiring intervention
+4. Recommend nephrology referral for diabetic nephropathy evaluation

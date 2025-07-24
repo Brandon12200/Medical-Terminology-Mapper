@@ -10,7 +10,7 @@ import os
 # Add parent directory to path to import app modules
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from api.v1.routers import terminology, batch, system, ai, test_files
+from api.v1.routers import terminology, batch, system, ai, test_files, documents
 from app.utils.logger import setup_logger
 
 # Setup logger
@@ -72,6 +72,7 @@ app.include_router(batch.router, prefix="/api/v1", tags=["batch"])
 app.include_router(system.router, prefix="/api/v1", tags=["system"])
 app.include_router(ai.router, prefix="/api/v1", tags=["ai"])
 app.include_router(test_files.router, prefix="/api/v1", tags=["test-files"])
+app.include_router(documents.router, prefix="/api/v1", tags=["documents"])
 
 # Root endpoint
 @app.get("/")
@@ -82,7 +83,11 @@ async def root():
         "docs": "/api/docs"
     }
 
-# Health check endpoint
+# Health check endpoints
+@app.get("/health")
+async def simple_health_check():
+    return {"status": "healthy"}
+
 @app.get("/api/v1/health", tags=["system"])
 async def health_check():
     return {

@@ -496,22 +496,24 @@ class ContextAwareTerminologyMapper:
             
             # Use fuzzy matcher with domain preference
             if hasattr(self.base_mapper, 'fuzzy_matcher') and self.base_mapper.fuzzy_matcher:
-                fuzzy_results = self.base_mapper.fuzzy_matcher.find_similar_terms(
-                    term, limit=3, min_confidence=0.6
-                )
+                # Map URLs to simple names
+                system_mapping = {
+                    'http://snomed.info/sct': 'snomed',
+                    'http://loinc.org': 'loinc', 
+                    'http://www.nlm.nih.gov/research/umls/rxnorm': 'rxnorm'
+                }
                 
-                # Filter by preferred systems
-                for result in fuzzy_results:
-                    if result.get('system') in prefs.get('preferred_systems', []):
-                        result['confidence'] *= prefs['boost_factor']
-                        result['match_type'] = 'context_aware_fuzzy'
-                        return result
-                
-                # Return best fuzzy match if available
-                if fuzzy_results:
-                    best_match = fuzzy_results[0]
-                    best_match['match_type'] = 'fallback_fuzzy'
-                    return best_match
+                # Try each preferred system
+                preferred_urls = prefs.get('preferred_systems', ['http://snomed.info/sct', 'http://loinc.org'])
+                for preferred_url in preferred_urls:
+                    preferred_system = system_mapping.get(preferred_url, preferred_url)
+                    fuzzy_result = self.base_mapper.fuzzy_matcher.find_fuzzy_match(
+                        term, system=preferred_system, context=context_text
+                    )
+                    if fuzzy_result and fuzzy_result.get('confidence', 0) >= 0.6:
+                        fuzzy_result['confidence'] *= prefs['boost_factor']
+                        fuzzy_result['match_type'] = 'context_aware_fuzzy'
+                        return fuzzy_result
         
         # Return no match
         return {
@@ -615,9 +617,13 @@ class ContextAwareTerminologyMapper:
         try:
             # Use fuzzy matcher to find alternatives
             if hasattr(self.base_mapper, 'fuzzy_matcher') and self.base_mapper.fuzzy_matcher:
-                fuzzy_results = self.base_mapper.fuzzy_matcher.find_similar_terms(
-                    term, limit=5, min_confidence=0.5
-                )
+                fuzzy_results = []
+                for system in ['snomed', 'loinc', 'rxnorm']:
+                    fuzzy_result = self.base_mapper.fuzzy_matcher.find_fuzzy_match(
+                        term, system=system
+                    )
+                    if fuzzy_result and fuzzy_result.get('confidence', 0) >= 0.5:
+                        fuzzy_results.append(fuzzy_result)
                 
                 for result in fuzzy_results:
                     # Skip if same as primary mapping

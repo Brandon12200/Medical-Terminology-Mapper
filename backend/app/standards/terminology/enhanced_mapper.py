@@ -173,7 +173,8 @@ class EnhancedTerminologyMapper:
                     applied_rules.append({
                         'rule_id': mapping.get('rule_id'),
                         'rule_type': mapping.get('rule_type'),
-                        'match_reason': mapping.get('match_reason')
+                        'match_reason': mapping.get('match_reason'),
+                        'confidence': mapping.get('confidence', 1.0)
                     })
                     self.processing_stats['rule_overrides_applied'] += 1
             
@@ -405,7 +406,7 @@ class EnhancedTerminologyMapper:
                             'rule_id': mapping.get('rule_id'),
                             'rule_type': mapping.get('rule_type'),
                             'match_reason': mapping.get('match_reason'),
-                            'confidence': mapping.get('confidence')
+                            'confidence': mapping.get('confidence', 1.0)
                         })
                 
                 final_mappings = enhanced_mappings

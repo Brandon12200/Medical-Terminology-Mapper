@@ -1,0 +1,43 @@
+DISCHARGE SUMMARY
+
+Patient Name: Robert Johnson
+MRN: 456789123
+Admission Date: 2024-01-15
+Discharge Date: 2024-01-18
+Attending Physician: Dr. Sarah Williams, MD
+
+PRINCIPAL DIAGNOSIS:
+1. Acute myocardial infarction, STEMI, LAD territory (I21.02)
+
+SECONDARY DIAGNOSES:
+1. Type 2 diabetes mellitus with diabetic nephropathy (E11.21)
+2. Essential hypertension (I10)
+3. Hyperlipidemia (E78.5)
+4. Chronic kidney disease, stage 3 (N18.3)
+
+PROCEDURES PERFORMED:
+1. Cardiac catheterization with percutaneous coronary intervention
+2. Drug-eluting stent placement to proximal LAD
+3. Transthoracic echocardiogram
+
+HOSPITAL COURSE:
+Mr. Johnson is a 68-year-old male who presented to the ED with acute onset substernal chest pain radiating to left arm. Initial EKG showed ST elevations in leads V1-V4. Troponin I peaked at 45.2 ng/mL. Patient was taken emergently to cardiac catheterization lab where 95% occlusion of proximal LAD was identified and successfully stented with drug-eluting stent. Post-procedure, patient remained hemodynamically stable. Echo showed EF 45% with anterior wall hypokinesis.
+
+MEDICATIONS ON DISCHARGE:
+1. Aspirin 81mg PO daily
+2. Clopidogrel 75mg PO daily x 12 months
+3. Atorvastatin 80mg PO daily
+4. Metoprolol succinate 50mg PO daily
+5. Lisinopril 10mg PO daily
+6. Metformin 1000mg PO BID
+7. Insulin glargine 20 units SC at bedtime
+
+DISCHARGE INSTRUCTIONS:
+- Cardiac rehabilitation program enrollment
+- Low sodium, diabetic diet
+- Daily weights, call if gain >3 lbs in 24 hrs
+- Follow up with cardiologist in 1 week
+- Follow up with PCP in 2 weeks
+
+PROGNOSIS:
+Good with medication compliance and lifestyle modifications
