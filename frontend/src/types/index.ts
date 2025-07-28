@@ -1,6 +1,6 @@
 export interface MappingRequest {
   term: string;
-  system: 'snomed' | 'loinc' | 'rxnorm' | 'all';
+  systems: ('snomed' | 'loinc' | 'rxnorm' | 'all')[];
   context?: string;
   fuzzy_threshold?: number;
 }

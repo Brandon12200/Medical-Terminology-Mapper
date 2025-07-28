@@ -35,6 +35,9 @@ def populate_snomed_database(db_path):
         ("22298006", "Myocardial infarction", 1),
         ("414545008", "Ischemic heart disease", 1),
         ("400047006", "Peripheral vascular disease", 1),
+        ("194828000", "Deep vein thrombosis", 1),
+        ("42343007", "Congestive heart failure", 1),
+        ("233843008", "Acute myocardial infarction", 1),
         
         # Hematomas and bleeding
         ("385494008", "Hematoma", 1),
@@ -74,6 +77,14 @@ def populate_snomed_database(db_path):
         ("14760008", "Constipation", 1),
         ("235595009", "Gastroesophageal reflux disease", 1),
         ("397825006", "Ulcer", 1),
+        ("24526004", "Inflammatory bowel disease", 1),
+        ("64766004", "Ulcerative colitis", 1),
+        ("15502006", "Acute pancreatitis", 1),
+        ("197456007", "Chronic pancreatitis", 1),
+        ("82403002", "Cholangitis", 1),
+        ("13920009", "Hepatic encephalopathy", 1),
+        ("19943007", "Cirrhosis", 1),
+        ("74474003", "Gastrointestinal bleeding", 1),
         
         # Endocrine conditions
         ("73211009", "Diabetes mellitus", 1),
@@ -82,6 +93,11 @@ def populate_snomed_database(db_path):
         ("14140009", "Hyperthyroidism", 1),
         ("40930008", "Hypothyroidism", 1),
         ("237602007", "Metabolic syndrome", 1),
+        ("420868002", "Diabetic ketoacidosis", 1),
+        ("302866008", "Hypoglycemic coma", 1),
+        ("190416003", "Diabetic nephropathy", 1),
+        ("4855003", "Diabetic retinopathy", 1),
+        ("422034002", "Diabetic neuropathy", 1),
         
         # Musculoskeletal conditions
         ("161891005", "Back pain", 1),
@@ -98,6 +114,31 @@ def populate_snomed_database(db_path):
         ("312115002", "Cellulitis", 1),
         ("40733004", "Sepsis", 1),
         ("14189004", "Meningitis", 1),
+        ("76571007", "Septic shock", 1),
+        ("128045006", "Cellulitis", 1),
+        ("399153001", "Endocarditis", 1),
+        ("60168000", "Osteomyelitis", 1),
+        ("235936003", "Clostridium difficile colitis", 1),
+        ("115329001", "Methicillin-resistant Staphylococcus aureus infection", 1),
+        ("56717001", "Tuberculosis", 1),
+        ("50711007", "Hepatitis C", 1),
+        ("86406008", "Human immunodeficiency virus infection", 1),
+        
+        # Emergency conditions
+        ("410429000", "Cardiac arrest", 1),
+        ("401303003", "Acute ST-elevation myocardial infarction", 1),
+        ("39579001", "Anaphylaxis", 1),
+        ("230456007", "Status epilepticus", 1),
+        ("274100004", "Stroke", 1),
+        ("67782005", "Acute respiratory distress syndrome", 1),
+        ("60046008", "Pleural effusion", 1),
+        ("36118008", "Pneumothorax", 1),
+        ("230139000", "Transient ischemic attack", 1),
+        ("21454007", "Subarachnoid hemorrhage", 1),
+        ("274100004", "Intracerebral hemorrhage", 1),
+        ("91175000", "Seizure disorder", 1),
+        ("7200002", "Encephalitis", 1),
+        ("95896000", "Guillain-Barre syndrome", 1),
         
         # Mental health conditions
         ("35489007", "Depression", 1),
@@ -135,7 +176,7 @@ def populate_snomed_database(db_path):
         ("13418002", "Muscle", 1),
         ("39937001", "Skin", 1),
         
-        # Procedures
+        # Procedures - General
         ("71388002", "Surgery", 1),
         ("387713003", "Biopsy", 1),
         ("77477000", "Computed tomography", 1),
@@ -143,6 +184,228 @@ def populate_snomed_database(db_path):
         ("168537006", "Electrocardiogram", 1),
         ("252416005", "Blood test", 1),
         ("167217005", "Urinalysis", 1),
+        
+        # Cardiovascular procedures
+        ("232717009", "Coronary artery bypass graft", 1),
+        ("34068001", "Heart valve replacement", 1),
+        ("85053006", "Aortic valve replacement", 1),
+        ("443681008", "Mitral valve repair", 1),
+        ("32413006", "Heart transplant", 1),
+        ("18027006", "Cardiac catheterization", 1),
+        ("175076006", "Coronary angioplasty", 1),
+        ("415070008", "Percutaneous coronary intervention", 1),
+        
+        # Pulmonary procedures
+        ("359615001", "Lung transplant", 1),
+        ("173278005", "Lobectomy", 1),
+        ("359601003", "Pneumonectomy", 1),
+        ("39130007", "Thoracotomy", 1),
+        ("444783004", "Video-assisted thoracoscopic surgery", 1),
+        ("359540000", "Esophagectomy", 1),
+        ("30570002", "Thoracentesis", 1),
+        
+        # Neurological procedures
+        ("39337004", "Craniotomy", 1),
+        ("177146009", "Craniectomy", 1),
+        ("426425006", "Deep brain stimulation", 1),
+        ("77465005", "Spinal fusion", 1),
+        ("18286008", "Laminectomy", 1),
+        ("387743006", "Discectomy", 1),
+        ("6934003", "Aneurysm clipping", 1),
+        ("447688006", "Arteriovenous malformation resection", 1),
+        ("397956004", "Shunt placement", 1),
+        ("392247006", "Burr hole", 1),
+        
+        # Transplant procedures
+        ("70536003", "Kidney transplant", 1),
+        ("88039007", "Liver transplant", 1),
+        ("62438007", "Pancreas transplant", 1),
+        ("175899003", "Bone marrow transplant", 1),
+        
+        # Urological procedures
+        ("175905003", "Nephrectomy", 1),
+        ("396488005", "Radical prostatectomy", 1),
+        ("24883007", "Cystectomy", 1),
+        ("34896006", "Ureterostomy", 1),
+        ("8563002", "Pyeloplasty", 1),
+        ("89164003", "Lithotripsy", 1),
+        ("176258000", "Transurethral resection of prostate", 1),
+        
+        # Gynecological procedures
+        ("236886002", "Hysterectomy", 1),
+        ("432102000", "Ovarian cystectomy", 1),
+        ("79876008", "Cesarean section", 1),
+        ("180292002", "Tubal ligation", 1),
+        ("85986006", "Dilation and curettage", 1),
+        ("387639001", "Laparoscopic surgery", 1),
+        ("78140002", "Myomectomy", 1),
+        ("359540001", "Vulvectomy", 1),
+        
+        # Oncological procedures
+        ("172043006", "Mastectomy", 1),
+        ("64368001", "Lumpectomy", 1),
+        ("234262008", "Lymph node dissection", 1),
+        ("392090004", "Tumor resection", 1),
+        
+        # Gastrointestinal procedures
+        ("174041007", "Colectomy", 1),
+        ("235150006", "Ileostomy", 1),
+        ("235138003", "Colostomy", 1),
+        ("80146002", "Appendectomy", 1),
+        ("38102005", "Cholecystectomy", 1),
+        ("359593004", "Liver resection", 1),
+        ("265459002", "Pancreaticoduodenectomy", 1),
+        ("234319005", "Splenectomy", 1),
+        ("442338001", "Gastric bypass", 1),
+        ("432102001", "Sleeve gastrectomy", 1),
+        ("27202005", "Fundoplication", 1),
+        ("277132007", "Hernia repair", 1),
+        ("86481000", "Laparotomy", 1),
+        
+        # Orthopedic procedures  
+        ("179344006", "Total hip replacement", 1),
+        ("179351002", "Total knee replacement", 1),
+        ("68254008", "Arthroscopy", 1),
+        ("359554009", "Rotator cuff repair", 1),
+        ("429473008", "Anterior cruciate ligament reconstruction", 1),
+        ("76676007", "Fracture repair", 1),
+        ("81723002", "Amputation", 1),
+        ("55705006", "Joint fusion", 1),
+        ("52734007", "Bone graft", 1),
+        ("298152002", "Tendon repair", 1),
+        
+        # Plastic surgery procedures
+        ("172042001", "Rhinoplasty", 1),
+        ("359552008", "Facelift", 1),
+        ("406505007", "Breast reconstruction", 1),
+        ("236071009", "Abdominoplasty", 1),
+        ("80762004", "Liposuction", 1),
+        ("106004005", "Skin graft", 1),
+        ("469455009", "Flap reconstruction", 1),
+        ("41354003", "Cleft lip repair", 1),
+        ("179352009", "Hand surgery", 1),
+        ("387746002", "Microsurgery", 1),
+        
+        # Ophthalmological procedures
+        ("54885007", "Cataract extraction", 1),
+        ("397956005", "Retinal detachment repair", 1),
+        ("75732000", "Vitrectomy", 1),
+        ("89666000", "Corneal transplant", 1),
+        ("387714009", "Glaucoma surgery", 1),
+        ("397394009", "LASIK surgery", 1),
+        ("172043007", "Strabismus surgery", 1),
+        ("431182000", "Eyelid surgery", 1),
+        ("359615002", "Enucleation", 1),
+        ("172044001", "Orbital surgery", 1),
+        
+        # ENT procedures
+        ("173423002", "Tonsillectomy", 1),
+        ("119954001", "Adenoidectomy", 1),
+        ("83578000", "Septoplasty", 1),
+        ("397394010", "Sinus surgery", 1),
+        ("24486003", "Thyroidectomy", 1),
+        ("69031006", "Parathyroidectomy", 1),
+        ("287527007", "Mastoidectomy", 1),
+        ("448727005", "Cochlear implant", 1),
+        ("173160006", "Laryngectomy", 1),
+        ("48387007", "Tracheostomy", 1),
+        ("359540003", "Parotidectomy", 1),
+        ("359615003", "Neck dissection", 1),
+        ("387746003", "Maxillofacial surgery", 1),
+        ("65546002", "Dental extraction", 1),
+        ("425906003", "Dental implant", 1),
+        ("387746004", "Jaw surgery", 1),
+        
+        # Rare diseases
+        ("58756001", "Huntington disease", 1),
+        ("88518009", "Wilson disease", 1),
+        ("19346006", "Marfan syndrome", 1),
+        ("398114001", "Ehlers-Danlos syndrome", 1),
+        ("52702003", "Fabry disease", 1),
+        ("3947004", "Gaucher disease", 1),
+        ("76612001", "Tay-Sachs disease", 1),
+        ("79238002", "Niemann-Pick disease", 1),
+        ("232169006", "Pompe disease", 1),
+        ("37160008", "Hurler syndrome", 1),
+        ("19953009", "Hunter syndrome", 1),
+        ("29104002", "Sanfilippo syndrome", 1),
+        ("30748003", "Morquio syndrome", 1),
+        ("68225006", "Krabbe disease", 1),
+        ("50811005", "Canavan disease", 1),
+        ("230272005", "Alexander disease", 1),
+        ("128613002", "Pelizaeus-Merzbacher disease", 1),
+        ("13629007", "Adrenoleukodystrophy", 1),
+        ("41040004", "Zellweger syndrome", 1),
+        ("26119002", "Refsum disease", 1),
+        ("253170002", "Friedreich ataxia", 1),
+        ("17226007", "Spinocerebellar ataxia", 1),
+        ("29945008", "Hereditary spastic paraplegia", 1),
+        ("37340000", "Charcot-Marie-Tooth disease", 1),
+        ("73297009", "Spinal muscular atrophy", 1),
+        ("73297009", "Duchenne muscular dystrophy", 1),
+        ("13213009", "Becker muscular dystrophy", 1),
+        ("62507008", "Facioscapulohumeral dystrophy", 1),
+        ("37340000", "Myotonic dystrophy", 1),
+        ("398154008", "Limb-girdle muscular dystrophy", 1),
+        ("71181003", "Congenital myopathy", 1),
+        ("128613002", "Mitochondrial myopathy", 1),
+        
+        # Kidney conditions  
+        ("90708001", "Kidney disease", 1),
+        ("236379002", "Nephrotic syndrome", 1),
+        ("46177005", "Renal artery stenosis", 1),
+        ("403595002", "Acute kidney injury", 1),
+        ("431855005", "Chronic kidney disease", 1),
+        
+        # Additional musculoskeletal
+        ("399963005", "Systemic lupus erythematosus", 1),
+        ("203082005", "Fibromyalgia", 1),
+        ("90560007", "Gout", 1),
+        ("76107001", "Spinal stenosis", 1),
+        ("73589001", "Herniated disc", 1),
+        ("263204007", "Rotator cuff tear", 1),
+        ("64156001", "Compartment syndrome", 1),
+        
+        # Cancer conditions
+        ("254837009", "Breast cancer", 1),
+        ("363358000", "Lung cancer", 1),
+        ("264267007", "Colorectal cancer", 1),
+        ("254900004", "Prostate cancer", 1),
+        ("118600007", "Lymphoma", 1),
+        ("93143009", "Leukemia", 1),
+        ("372244006", "Melanoma", 1),
+        ("372142009", "Pancreatic cancer", 1),
+        ("126952004", "Brain tumor", 1),
+        ("363443007", "Ovarian cancer", 1),
+        
+        # Hematological conditions
+        ("165517008", "Neutropenia", 1),
+        ("109992007", "Polycythemia vera", 1),
+        ("439698008", "Thrombophilia", 1),
+        ("90935002", "Hemophilia A", 1),
+        ("417357006", "Sickle cell disease", 1),
+        ("40108008", "Thalassemia", 1),
+        ("67406007", "Disseminated intravascular coagulation", 1),
+        ("128105008", "Von Willebrand disease", 1),
+        
+        # Pregnancy conditions
+        ("77386006", "Pregnancy", 1),
+        ("11687002", "Gestational diabetes", 1),
+        ("415105001", "Placental abruption", 1),
+        ("12953007", "Postpartum hemorrhage", 1),
+        ("34801009", "Ectopic pregnancy", 1),
+        ("17369002", "Miscarriage", 1),
+        ("395507008", "Preterm labor", 1),
+        ("35688006", "Hyperemesis gravidarum", 1),
+        ("48194001", "Gestational hypertension", 1),
+        ("59566000", "Amniotic fluid embolism", 1),
+        
+        # Substance use disorders
+        ("191816009", "Substance use disorder", 1),
+        ("8635007", "Delirium tremens", 1),
+        ("58214004", "Schizoaffective disorder", 1),
+        ("31490003", "Obsessive-compulsive disorder", 1),
+        ("406506008", "Attention deficit hyperactivity disorder", 1),
     ]
     
     # Insert terms with proper columns
@@ -230,6 +493,50 @@ def populate_loinc_database(db_path):
         ("5804-0", "Protein [Mass/volume] in Urine by Test strip", "Prot Ur strip", "ACTIVE"),
         ("5797-6", "Ketones [Mass/volume] in Urine by Test strip", "Ketones Ur strip", "ACTIVE"),
         ("5811-5", "Specific gravity of Urine by Test strip", "Sp Gr Ur strip", "ACTIVE"),
+        
+        # Additional specialized tests
+        ("32781-7", "Tuberculosis interferon-gamma release assay", "TB IGRA", "ACTIVE"),
+        ("11218-5", "Hepatitis C virus antibody", "HCV Ab", "ACTIVE"),
+        ("43703-4", "Human immunodeficiency virus antibody", "HIV Ab", "ACTIVE"),
+        ("3255-7", "Fibrinogen", "Fibrinogen", "ACTIVE"),
+        ("1759-0", "Albumin [Mass/volume] in Serum", "Albumin Ser", "ACTIVE"),
+        ("33747-0", "Estimated glomerular filtration rate", "eGFR", "ACTIVE"),
+        ("6301-6", "INR", "INR", "ACTIVE"),
+        ("3173-2", "Activated partial thromboplastin time", "aPTT", "ACTIVE"),
+        ("11218-5", "Hepatitis C virus Ab [Units/volume] in Serum", "HCV Ab Ser", "ACTIVE"),
+        
+        # Cardiac markers
+        ("48065-7", "Troponin T high sensitivity", "TnT hs", "ACTIVE"),
+        ("49563-0", "Cardiac troponin", "Cardiac TnI", "ACTIVE"),
+        ("30934-4", "B-type natriuretic peptide", "BNP", "ACTIVE"),
+        
+        # Hormones and endocrinology
+        ("33747-0", "Thyroid-stimulating immunoglobulin", "TSI", "ACTIVE"),
+        ("11579-0", "Thyroxine free", "T4 free", "ACTIVE"),
+        ("16915-1", "Beta-human chorionic gonadotropin", "hCG beta", "ACTIVE"),
+        ("1558-6", "Fasting glucose", "Glucose fasting", "ACTIVE"),
+        ("1500-8", "Growth hormone", "GH", "ACTIVE"),
+        ("14933-6", "Adrenocorticotropic hormone", "ACTH", "ACTIVE"),
+        ("2143-6", "Insulin-like growth factor 1", "IGF-1", "ACTIVE"),
+        ("2731-8", "Parathyroid hormone", "PTH", "ACTIVE"),
+        
+        # Vitamins and nutrients
+        ("14635-7", "25-hydroxyvitamin D", "25(OH)D", "ACTIVE"),
+        ("1371-6", "1,25-dihydroxyvitamin D", "1,25(OH)2D", "ACTIVE"),
+        ("2132-9", "Vitamin B12", "B12", "ACTIVE"),
+        ("2284-8", "Folate", "Folate", "ACTIVE"),
+        
+        # Iron studies
+        ("2498-4", "Iron", "Iron", "ACTIVE"),
+        ("2500-7", "Total iron-binding capacity", "TIBC", "ACTIVE"),
+        ("33759-8", "Transferrin saturation", "TSAT", "ACTIVE"),
+        ("2276-4", "Ferritin", "Ferritin", "ACTIVE"),
+        
+        # Autoimmune markers
+        ("13068-2", "Antineutrophil cytoplasmic antibody", "ANCA", "ACTIVE"),
+        ("11572-5", "Anti-cyclic citrullinated peptide", "Anti-CCP", "ACTIVE"),
+        ("8051-0", "Tissue transglutaminase antibody", "tTG Ab", "ACTIVE"),
+        ("8086-6", "Anti-glutamic acid decarboxylase", "Anti-GAD", "ACTIVE"),
     ]
     
     # Insert terms with proper columns
@@ -337,6 +644,42 @@ def populate_rxnorm_database(db_path):
         ("40790", "Pravastatin", "IN", "N"),
         ("3339", "Fenofibrate", "IN", "N"),
         ("301542", "Ezetimibe", "IN", "N"),
+        ("6472", "Lovastatin", "IN", "N"),
+        ("36567", "Fluvastatin", "IN", "N"),
+        
+        # Additional pain medications
+        ("10689", "Tramadol", "IN", "N"),
+        ("2670", "Oxycodone", "IN", "N"),
+        ("7052", "Morphine", "IN", "N"),
+        ("5489", "Hydrocodone", "IN", "N"),
+        ("787390", "Fentanyl", "IN", "N"),
+        ("23088", "Codeine", "IN", "N"),
+        
+        # Additional antibiotics
+        ("149078", "Clindamycin", "IN", "N"),
+        ("8745", "Metronidazole", "IN", "N"),
+        ("20610", "Vancomycin", "IN", "N"),
+        ("42347", "Penicillin", "IN", "N"),
+        ("904", "Ampicillin", "IN", "N"),
+        
+        # Additional cardiovascular
+        ("29046", "Amlodipine", "IN", "N"),
+        ("3827", "Warfarin", "IN", "N"),
+        ("32968", "Carvedilol", "IN", "N"),
+        ("4603", "Digoxin", "IN", "N"),
+        ("50166", "Hydrochlorothiazide", "IN", "N"),
+        
+        # Cancer medications
+        ("1790099", "Doxorubicin", "IN", "N"),
+        ("1796", "Cyclophosphamide", "IN", "N"),
+        ("42515", "Cisplatin", "IN", "N"),
+        ("72962", "Tamoxifen", "IN", "N"),
+        
+        # Specialty medications
+        ("36221", "Adalimumab", "IN", "N"),
+        ("135447", "Infliximab", "IN", "N"),
+        ("284635", "Etanercept", "IN", "N"),
+        ("475968", "Rituximab", "IN", "N"),
     ]
     
     # Insert terms with proper columns

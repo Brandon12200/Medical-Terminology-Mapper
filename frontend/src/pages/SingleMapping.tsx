@@ -7,10 +7,13 @@ export const SingleMapping = () => {
   const [results, setResults] = useState<MappingResponse | null>(null);
 
   return (
-    <div className="max-w-3xl mx-auto">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">
+    <div className="form-container">
+      <h1 className="form-title">
         Single Term Mapping
       </h1>
+      <p className="form-description">
+        Enter a medical term below to find its standardized mappings across SNOMED CT, LOINC, and RxNorm terminologies.
+      </p>
       
       <SingleTermForm onSubmit={setResults} />
       

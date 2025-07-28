@@ -98,6 +98,37 @@ wait_for_services() {
     fi
 }
 
+# Function to open browser
+open_browser() {
+    local url="$1"
+    
+    # Check operating system and open browser accordingly
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS
+        open "$url"
+    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        # Linux
+        if command -v xdg-open >/dev/null 2>&1; then
+            xdg-open "$url"
+        elif command -v gnome-open >/dev/null 2>&1; then
+            gnome-open "$url"
+        elif command -v firefox >/dev/null 2>&1; then
+            firefox "$url"
+        elif command -v chromium-browser >/dev/null 2>&1; then
+            chromium-browser "$url"
+        elif command -v google-chrome >/dev/null 2>&1; then
+            google-chrome "$url"
+        else
+            print_warning "Could not detect browser to open automatically"
+        fi
+    elif [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "win32" ]]; then
+        # Windows
+        start "$url"
+    else
+        print_warning "Unknown OS type: $OSTYPE - cannot open browser automatically"
+    fi
+}
+
 # Function to display service URLs
 show_urls() {
     echo ""
@@ -172,6 +203,10 @@ main() {
     
     # Show service information
     show_urls
+    
+    # Open browser to the web interface
+    print_status "Opening web interface in browser..."
+    open_browser "http://localhost:3000"
     
     print_success "Startup complete! The application is ready to use."
 }

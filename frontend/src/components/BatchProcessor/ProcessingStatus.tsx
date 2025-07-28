@@ -30,35 +30,64 @@ export const ProcessingStatus = ({ jobId, onComplete }: ProcessingStatusProps) =
     : 0;
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow">
-      <h3 className="text-lg font-medium text-gray-900 mb-4">Processing Status</h3>
+    <div style={{
+      background: 'white',
+      padding: '1.5rem',
+      borderRadius: '8px',
+      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+      border: '1px solid #e5e7eb'
+    }}>
+      <h3 style={{ 
+        fontSize: '1.125rem', 
+        fontWeight: '600', 
+        color: '#374151',
+        margin: '0 0 1rem 0'
+      }}>
+        Processing Status
+      </h3>
       
-      <div className="space-y-4">
-        <div>
-          <div className="flex justify-between text-sm text-gray-600 mb-1">
-            <span>Progress</span>
-            <span>{status.processed_terms} / {status.total_terms} terms</span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div
-              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
+      <div style={{ marginBottom: '1rem' }}>
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          marginBottom: '0.5rem',
+          fontSize: '0.875rem',
+          color: '#6b7280'
+        }}>
+          <span>Progress</span>
+          <span>{status.processed_terms} / {status.total_terms} terms</span>
         </div>
-
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-600">Status:</span>
-          <span className={`text-sm font-medium ${
-            status.status === 'completed' ? 'text-green-600' :
-            status.status === 'failed' ? 'text-red-600' :
-            'text-blue-600'
-          }`}>
-            {status.status.charAt(0).toUpperCase() + status.status.slice(1)}
-          </span>
+        
+        <div style={{
+          width: '100%',
+          height: '8px',
+          backgroundColor: '#f3f4f6',
+          borderRadius: '4px',
+          overflow: 'hidden'
+        }}>
+          <div style={{
+            height: '100%',
+            backgroundColor: '#3b82f6',
+            width: `${progress}%`,
+            transition: 'width 0.3s ease',
+            borderRadius: '4px'
+          }} />
         </div>
+      </div>
 
-        {status.status === 'processing' && <LoadingSpinner />}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        fontSize: '0.875rem'
+      }}>
+        <span style={{ color: '#6b7280' }}>Status:</span>
+        <span style={{ 
+          fontWeight: '500',
+          color: status.status === 'completed' ? '#059669' : 
+                status.status === 'failed' ? '#dc2626' : '#3b82f6'
+        }}>
+          {status.status.charAt(0).toUpperCase() + status.status.slice(1)}
+        </span>
       </div>
     </div>
   );

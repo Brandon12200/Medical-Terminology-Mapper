@@ -12,7 +12,7 @@ interface SingleTermFormProps {
 export const SingleTermForm = ({ onSubmit }: SingleTermFormProps) => {
   const [formData, setFormData] = useState<MappingRequest>({
     term: '',
-    system: 'all',
+    systems: ['all'],
     context: '',
     fuzzy_threshold: 0.8,
   });
@@ -40,14 +40,18 @@ export const SingleTermForm = ({ onSubmit }: SingleTermFormProps) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: name === 'fuzzy_threshold' ? parseFloat(value) : value,
+      [name]: name === 'fuzzy_threshold' 
+        ? parseFloat(value) 
+        : name === 'systems' 
+          ? [value] 
+          : value,
     }));
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 bg-white p-6 rounded-lg shadow">
-      <div>
-        <label htmlFor="term" className="block text-sm font-medium text-gray-700">
+    <form onSubmit={handleSubmit}>
+      <div className="form-group">
+        <label htmlFor="term" className="form-label">
           Medical Term
         </label>
         <input
@@ -56,25 +60,25 @@ export const SingleTermForm = ({ onSubmit }: SingleTermFormProps) => {
           id="term"
           value={formData.term}
           onChange={handleChange}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
+          className="form-input"
           placeholder="e.g., diabetes mellitus type 2"
           required
         />
       </div>
 
-      <div>
-        <label htmlFor="system" className="block text-sm font-medium text-gray-700">
+      <div className="form-group">
+        <label htmlFor="systems" className="form-label">
           Terminology System
         </label>
         <select
-          name="system"
-          id="system"
-          value={formData.system}
+          name="systems"
+          id="systems"
+          value={formData.systems[0]}
           onChange={handleChange}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
+          className="form-select"
         >
           <option value="all">All Systems</option>
-          {systems?.map(system => (
+          {systems && Array.isArray(systems) && systems.map(system => (
             <option key={system.name} value={system.name}>
               {system.display_name}
             </option>
@@ -82,8 +86,8 @@ export const SingleTermForm = ({ onSubmit }: SingleTermFormProps) => {
         </select>
       </div>
 
-      <div>
-        <label htmlFor="context" className="block text-sm font-medium text-gray-700">
+      <div className="form-group">
+        <label htmlFor="context" className="form-label">
           Clinical Context (Optional)
         </label>
         <input
@@ -92,13 +96,13 @@ export const SingleTermForm = ({ onSubmit }: SingleTermFormProps) => {
           id="context"
           value={formData.context}
           onChange={handleChange}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
+          className="form-input"
           placeholder="e.g., endocrine disorder"
         />
       </div>
 
-      <div>
-        <label htmlFor="fuzzy_threshold" className="block text-sm font-medium text-gray-700">
+      <div className="form-group">
+        <label htmlFor="fuzzy_threshold" className="form-label">
           Fuzzy Match Threshold
         </label>
         <input
@@ -110,7 +114,7 @@ export const SingleTermForm = ({ onSubmit }: SingleTermFormProps) => {
           step="0.1"
           value={formData.fuzzy_threshold}
           onChange={handleChange}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
+          className="form-input"
         />
       </div>
 
@@ -121,7 +125,8 @@ export const SingleTermForm = ({ onSubmit }: SingleTermFormProps) => {
       <button
         type="submit"
         disabled={mutation.isPending}
-        className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="btn btn-primary"
+        style={{ width: '100%' }}
       >
         {mutation.isPending ? <LoadingSpinner /> : 'Map Term'}
       </button>

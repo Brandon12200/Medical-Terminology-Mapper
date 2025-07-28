@@ -74,8 +74,8 @@ export const mappingService = {
 
   // Get available systems
   getSystems: async (): Promise<SystemInfo[]> => {
-    const { data } = await api.get<SystemInfo[]>('/systems');
-    return data;
+    const { data } = await api.get<{ systems: SystemInfo[] }>('/systems');
+    return data.systems || [];
   },
 
   // Process batch
@@ -92,28 +92,31 @@ export const mappingService = {
 
   // Get batch results
   getBatchResults: async (jobId: string): Promise<MappingResponse[]> => {
-    const { data } = await api.get<any[]>(`/batch/result/${jobId}`);
+    const { data } = await api.get<any>(`/batch/result/${jobId}`);
     
-    // Transform each result if needed
-    return data.map(item => {
-      if (item.results && typeof item.results === 'object') {
-        const mappings: any[] = [];
-        
-        // Flatten the results dictionary into a single array
-        Object.entries(item.results).forEach(([system, systemMappings]) => {
+    // Backend returns BatchJobResult object with results array
+    const resultsArray = data.results || [];
+    
+    // Transform each result to match frontend interface
+    return resultsArray.map((item: any) => {
+      const mappings: any[] = [];
+      
+      // Handle both possible field names (item.mappings or item.results)
+      const mappingData = item.mappings || item.results || {};
+      
+      if (mappingData && typeof mappingData === 'object') {
+        // Flatten the mappings dictionary into a single array
+        Object.entries(mappingData).forEach(([system, systemMappings]) => {
           if (Array.isArray(systemMappings)) {
             mappings.push(...systemMappings);
           }
         });
-        
-        return {
-          term: item.term,
-          mappings: mappings
-        };
       }
       
-      // If already in expected format, return as-is
-      return item;
+      return {
+        term: item.original_term || item.term, // Handle both field names
+        mappings: mappings
+      };
     });
   },
 
@@ -121,6 +124,9 @@ export const mappingService = {
   uploadFile: async (file: File): Promise<{ job_id: string }> => {
     const formData = new FormData();
     formData.append('file', file);
+    formData.append('file_format', 'csv'); // Add required file_format parameter
+    formData.append('column_name', 'term'); // Specify the column containing terms
+    // Don't send systems parameter - backend has default value of ["all"]
     
     const { data } = await api.post<{ job_id: string }>('/batch/upload', formData, {
       headers: {

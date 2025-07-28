@@ -9,11 +9,41 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-# Define the test files directory
-TEST_FILES_DIR = Path(__file__).parent.parent.parent.parent.parent / "data" / "test_files"
+# Define the test files directory - use absolute path
+TEST_FILES_DIR = Path("/app/data/test_files")
 
-# Define which files to expose
+# Define which files to expose - including comprehensive sample files
 AVAILABLE_TEST_FILES = {
+    "hospital_discharge_summary.csv": {
+        "name": "Hospital Discharge Summary",
+        "description": "120+ comprehensive medical conditions across all specialties",
+        "size": "large"
+    },
+    "comprehensive_lab_tests.csv": {
+        "name": "Comprehensive Lab Tests", 
+        "description": "150+ laboratory tests with clinical significance",
+        "size": "large"
+    },
+    "comprehensive_medications.csv": {
+        "name": "Pharmaceutical Database",
+        "description": "200+ medications covering all major drug classes",
+        "size": "large"
+    },
+    "emergency_department_cases.csv": {
+        "name": "Emergency Department Cases",
+        "description": "100+ emergency scenarios with triage complexity",
+        "size": "large"
+    },
+    "surgical_procedures.csv": {
+        "name": "Surgical Procedures",
+        "description": "130+ surgical procedures with complexity ratings",
+        "size": "large"
+    },
+    "rare_diseases_comprehensive.csv": {
+        "name": "Rare Diseases",
+        "description": "200+ rare genetic conditions with inheritance patterns",
+        "size": "large"
+    },
     "simple_terms.csv": {
         "name": "Simple Terms",
         "description": "Basic medical terms for quick testing",
@@ -33,16 +63,6 @@ AVAILABLE_TEST_FILES = {
         "name": "Lab Tests",
         "description": "Laboratory test names and codes",
         "size": "medium"
-    },
-    "fuzzy_test_terms.csv": {
-        "name": "Fuzzy Test Terms",
-        "description": "Terms with misspellings and variations",
-        "size": "small"
-    },
-    "edge_cases.csv": {
-        "name": "Edge Cases",
-        "description": "Challenging terms and edge cases",
-        "size": "small"
     }
 }
 

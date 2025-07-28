@@ -230,11 +230,19 @@ class BatchService:
                 job.progress_percentage = (job.processed_terms / job.total_terms) * 100
                 job.updated_at = datetime.utcnow()
                 
-                # Store results
+                # Store results - convert TermMapping objects to dicts
                 for result in batch_response.results:
+                    # Convert TermMapping objects to dictionaries for JSON serialization
+                    serializable_mappings = {}
+                    for system, mappings in result.results.items():
+                        serializable_mappings[system] = [
+                            mapping.model_dump() if hasattr(mapping, 'model_dump') else mapping
+                            for mapping in mappings
+                        ]
+                    
                     all_results.append({
                         "original_term": result.term,
-                        "mappings": result.results,
+                        "mappings": serializable_mappings,
                         "total_matches": result.total_matches
                     })
             
