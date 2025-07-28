@@ -303,41 +303,6 @@ MODEL_CONFIG = {
 }
 ```
 
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-### Development Guidelines
-
-- Follow PEP 8 for Python code
-- Use TypeScript for frontend components
-- Add tests for new functionality
-- Update documentation for API changes
-
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- **BioBERT**: Pre-trained biomedical language representation model
-- **SNOMED International**: SNOMED CT terminology
-- **LOINC**: Logical Observation Identifiers Names and Codes
-- **NLM**: RxNorm drug terminology
-- **Apache Tika**: Content analysis toolkit
-
-## 📞 Support
-
-For questions, issues, or contributions:
-
-- **GitHub Issues**: [Report bugs or request features](https://github.com/yourusername/medical-terminology-mapper/issues)
-- **Documentation**: [API Documentation](http://localhost:8000/docs)
-- **Email**: your.email@example.com
-
----
-
-**Note**: This system is designed for research and development purposes. For production medical applications, please ensure compliance with relevant healthcare regulations (HIPAA, GDPR, etc.).
