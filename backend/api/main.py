@@ -10,7 +10,7 @@ import os
 # Add parent directory to path to import app modules
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from api.v1.routers import terminology, batch, system, ai, test_files, documents
+from api.v1.routers import terminology, batch, system, test_files
 from app.utils.logger import setup_logger
 
 # Setup logger
@@ -70,9 +70,7 @@ async def global_exception_handler(request, exc):
 app.include_router(terminology.router, prefix="/api/v1", tags=["terminology"])
 app.include_router(batch.router, prefix="/api/v1", tags=["batch"])
 app.include_router(system.router, prefix="/api/v1", tags=["system"])
-app.include_router(ai.router, prefix="/api/v1", tags=["ai"])
 app.include_router(test_files.router, prefix="/api/v1", tags=["test-files"])
-app.include_router(documents.router, prefix="/api/v1", tags=["documents"])
 
 # Root endpoint
 @app.get("/")

@@ -19,7 +19,7 @@ import json
 import hashlib
 from pathlib import Path
 
-from app.extractors.term_cache import get_term_cache, TermCache
+# Term cache functionality removed with extractors
 from app.standards.terminology.custom_mapping_rules import CustomMappingRulesEngine
 
 logger = logging.getLogger(__name__)
@@ -269,9 +269,9 @@ class ParallelProcessor:
 class AdvancedCache:
     """Advanced caching system with multiple cache levels and strategies."""
     
-    def __init__(self, term_cache: Optional[TermCache] = None):
+    def __init__(self):
         """Initialize advanced cache."""
-        self.term_cache = term_cache or get_term_cache()
+        # Term cache functionality removed with extractors
         self.mapping_cache = {}
         self.rule_cache = {}
         self.stats_cache = {}

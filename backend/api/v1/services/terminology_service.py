@@ -6,7 +6,6 @@ import asyncio
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
 
 from api.v1.services.thread_safe_mapper import ThreadSafeTerminologyMapper
-from app.extractors.term_extractor import TermExtractor
 from app.utils.logger import setup_logger
 
 logger = setup_logger(__name__)
@@ -17,14 +16,10 @@ class TerminologyService:
         try:
             self.mapper = ThreadSafeTerminologyMapper()
             
-            try:
-                self.term_extractor = TermExtractor()
-                self.ai_enabled = True
-                logger.info("AI term extraction enabled with BioBERT")
-            except Exception as e:
-                logger.warning(f"AI term extraction not available: {str(e)}")
-                self.term_extractor = None
-                self.ai_enabled = False
+            # AI term extraction disabled - only fuzzy matching available
+            self.term_extractor = None
+            self.ai_enabled = False
+            logger.info("Terminology service initialized (fuzzy matching only)")
                 
             logger.info("Terminology service initialized successfully")
         except Exception as e:
@@ -102,21 +97,42 @@ class TerminologyService:
             List of mapping results for each term
         """
         try:
-            # Process terms concurrently
-            tasks = []
-            for term in terms:
-                task = self.map_term(
-                    term=term,
-                    systems=systems,
-                    context=context,
-                    fuzzy_threshold=fuzzy_threshold,
-                    fuzzy_algorithms=fuzzy_algorithms,
-                    max_results=max_results_per_term
-                )
-                tasks.append(task)
+            # Process terms with rate limiting to avoid overwhelming APIs
+            results = []
+            batch_size = 5  # Process 5 terms at a time
+            delay_between_batches = 0.2  # 200ms delay between batches
             
-            # Wait for all mappings to complete
-            results = await asyncio.gather(*tasks, return_exceptions=True)
+            for i in range(0, len(terms), batch_size):
+                batch_terms = terms[i:i + batch_size]
+                logger.info(f"Processing batch {i//batch_size + 1}: terms {i+1}-{min(i+batch_size, len(terms))} of {len(terms)}")
+                
+                # Process current batch concurrently
+                tasks = []
+                for term in batch_terms:
+                    task = self.map_term(
+                        term=term,
+                        systems=systems,
+                        context=context,
+                        fuzzy_threshold=fuzzy_threshold,
+                        fuzzy_algorithms=fuzzy_algorithms,
+                        max_results=max_results_per_term
+                    )
+                    tasks.append(task)
+                
+                # Wait for current batch to complete with timeout
+                try:
+                    batch_results = await asyncio.wait_for(
+                        asyncio.gather(*tasks, return_exceptions=True),
+                        timeout=15  # 15 second timeout per batch
+                    )
+                except asyncio.TimeoutError:
+                    logger.warning(f"Batch {i//batch_size + 1} timed out, creating error results")
+                    batch_results = [Exception("Request timed out") for _ in batch_terms]
+                results.extend(batch_results)
+                
+                # Add delay between batches to avoid rate limiting
+                if i + batch_size < len(terms):
+                    await asyncio.sleep(delay_between_batches)
             
             # Format results
             formatted_results = []
@@ -175,78 +191,40 @@ class TerminologyService:
                 "mapped_terms": {}
             }
             
-            if self.ai_enabled and self.term_extractor:
-                # Extract medical terms using BioBERT
-                logger.info(f"Extracting terms from text using AI (length: {len(text)} chars)")
-                extracted_entities = await asyncio.to_thread(
-                    self.term_extractor.extract_terms, text
-                )
-                
-                # Process each extracted entity
-                for entity in extracted_entities:
-                    term_info = {
-                        "text": entity["text"],
-                        "entity_type": entity["entity"],
-                        "confidence": entity["score"],
-                        "start": entity["start"],
-                        "end": entity["end"]
-                    }
-                    result["extracted_terms"].append(term_info)
-                    
-                    # Map the extracted term
-                    context = None
-                    if include_context:
-                        # Get surrounding text as context
-                        context_start = max(0, entity["start"] - 50)
-                        context_end = min(len(text), entity["end"] + 50)
-                        context = text[context_start:context_end]
-                    
-                    # Map the term
-                    mapping_result = await self.map_term(
-                        term=entity["text"],
-                        systems=systems,
-                        context=context,
-                        fuzzy_threshold=fuzzy_threshold
-                    )
-                    
-                    if mapping_result:
-                        result["mapped_terms"][entity["text"]] = mapping_result
-                
-                logger.info(f"Extracted {len(result['extracted_terms'])} medical terms using AI")
-            else:
-                # Fallback to regex-based extraction
-                logger.info("AI not available, using pattern-based extraction")
-                # Simple pattern matching for common medical terms
-                import re
-                medical_patterns = [
-                    r'\b(?:diabetes|hypertension|asthma|pneumonia|covid-19|coronavirus)\b',
-                    r'\b(?:glucose|hemoglobin|creatinine|cholesterol)\b',
-                    r'\b(?:metformin|insulin|aspirin|lisinopril)\b'
-                ]
-                
-                for pattern in medical_patterns:
-                    matches = re.finditer(pattern, text, re.IGNORECASE)
-                    for match in matches:
-                        term = match.group()
-                        if term not in [t["text"] for t in result["extracted_terms"]]:
-                            term_info = {
-                                "text": term,
-                                "entity_type": "PATTERN_MATCH",
-                                "confidence": 0.7,
-                                "start": match.start(),
-                                "end": match.end()
-                            }
-                            result["extracted_terms"].append(term_info)
-                            
-                            # Map the term
-                            mapping_result = await self.map_term(
-                                term=term,
-                                systems=systems,
-                                fuzzy_threshold=fuzzy_threshold
-                            )
-                            
-                            if mapping_result:
-                                result["mapped_terms"][term] = mapping_result
+            # AI term extraction disabled - use pattern-based extraction as fallback
+            logger.info("AI term extraction disabled - using pattern-based extraction")
+            
+            # Simple pattern matching for common medical terms
+            import re
+            medical_patterns = [
+                r'\b(?:diabetes|hypertension|asthma|pneumonia|covid-19|coronavirus)\b',
+                r'\b(?:glucose|hemoglobin|creatinine|cholesterol)\b',
+                r'\b(?:metformin|insulin|aspirin|lisinopril)\b'
+            ]
+            
+            for pattern in medical_patterns:
+                matches = re.finditer(pattern, text, re.IGNORECASE)
+                for match in matches:
+                    term = match.group()
+                    if term not in [t["text"] for t in result["extracted_terms"]]:
+                        term_info = {
+                            "text": term,
+                            "entity_type": "PATTERN_MATCH",
+                            "confidence": 0.7,
+                            "start": match.start(),
+                            "end": match.end()
+                        }
+                        result["extracted_terms"].append(term_info)
+                        
+                        # Map the term
+                        mapping_result = await self.map_term(
+                            term=term,
+                            systems=systems,
+                            fuzzy_threshold=fuzzy_threshold
+                        )
+                        
+                        if mapping_result:
+                            result["mapped_terms"][term] = mapping_result
             
             return result
             

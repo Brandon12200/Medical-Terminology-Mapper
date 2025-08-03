@@ -44,7 +44,7 @@ class TerminologyMapper:
     
     def _setup_external_services(self):
         """Setup external services."""
-        if self.config.get("use_external_services", False):
+        if self.config.get("use_external_services", True):  # Enable by default
             try:
                 from app.standards.terminology.api_services import TerminologyAPIService
                 self.external_service = TerminologyAPIService(
@@ -316,6 +316,10 @@ class TerminologyMapper:
         # Clean and normalize the term
         clean_term = self._normalize_term(term)
         
+        # Try external API first if available (temporarily disabled for SNOMED due to connectivity issues)
+        # if self.external_service:
+        #     logger.info(f"SNOMED APIs temporarily disabled for '{term}' - using local database")
+        
         # Check if term is an abbreviation and try expansions
         if clean_term.lower() in self.abbreviations:
             expansions = self.abbreviations[clean_term.lower()]
@@ -551,6 +555,42 @@ class TerminologyMapper:
             
         # Clean and normalize the term
         clean_term = self._normalize_term(term)
+        
+        # Try external API first if available
+        if self.external_service:
+            try:
+                # Try RxNorm API
+                api_results = self.external_service.search_rxnorm(clean_term, max_results=1)
+                if api_results:
+                    result = api_results[0]
+                    logger.info(f"Found RxNorm match via API for '{term}': {result.get('code')}")
+                    return {
+                        "code": result.get('code'),
+                        "display": result.get('display'),
+                        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                        "found": True,
+                        "confidence": 0.95,
+                        "match_type": "api",
+                        "source": "rxnorm_api",
+                        "tty": result.get('tty')
+                    }
+                
+                # Fallback to Clinical Tables API
+                api_results = self.external_service.search_clinical_tables(clean_term, 'rxterms', max_results=1)
+                if api_results:
+                    result = api_results[0]
+                    logger.info(f"Found RxNorm match via Clinical Tables for '{term}': {result.get('code')}")
+                    return {
+                        "code": result.get('code'),
+                        "display": result.get('display'),
+                        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                        "found": True,
+                        "confidence": 0.90,
+                        "match_type": "api",
+                        "source": "clinical_tables"
+                    }
+            except Exception as e:
+                logger.warning(f"External RxNorm API search failed for '{term}': {e}")
         
         # Check for directly mappable synonyms from loaded dictionary
         synonym_result = self._check_synonyms(clean_term, "rxnorm")

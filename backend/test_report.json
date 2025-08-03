@@ -1,12 +1,12 @@
 {
-  "timestamp": "2025-07-11T03:52:09.668424+00:00",
+  "timestamp": "2025-08-03T02:45:36.673305+00:00",
   "summary": {
     "total_tests": 14,
-    "passed": 12,
-    "failed": 2,
-    "warnings": 6,
-    "pass_rate": 85.71428571428571,
-    "status": "GOOD"
+    "passed": 13,
+    "failed": 1,
+    "warnings": 5,
+    "pass_rate": 92.85714285714286,
+    "status": "EXCELLENT"
   },
   "details": [
     {
@@ -36,7 +36,7 @@
     {
       "test": "SNOMED Mapping",
       "status": "PASS",
-      "message": "Found 5 diabetes mappings",
+      "message": "Found 7 diabetes mappings",
       "details": {}
     },
     {
@@ -64,27 +64,27 @@
       "details": {}
     },
     {
-      "test": "Document Service",
-      "status": "FAIL",
-      "message": "Service test failed: failed to find libmagic.  Check your installation",
-      "details": {}
-    },
-    {
-      "test": "BioBERT Service Init",
+      "test": "Document Service Init",
       "status": "PASS",
       "message": "Service initialized successfully",
       "details": {}
     },
     {
-      "test": "Entity Extraction",
+      "test": "Batch Creation",
       "status": "PASS",
-      "message": "Extracted 1 entities",
+      "message": "Created batch 6ac65883-ced8-474a-a1f4-fd23f8cd3a63",
       "details": {}
     },
     {
-      "test": "Terminology Integration",
-      "status": "WARN",
-      "message": "No entities mapped",
+      "test": "Batch Status",
+      "status": "PASS",
+      "message": "Retrieved batch status",
+      "details": {}
+    },
+    {
+      "test": "BioBERT Integration",
+      "status": "SKIP",
+      "message": "BioBERT functionality disabled in this build",
       "details": {}
     },
     {

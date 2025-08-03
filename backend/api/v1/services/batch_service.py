@@ -203,8 +203,8 @@ class BatchService:
             job.status = BatchStatus.PROCESSING
             job.updated_at = datetime.utcnow()
             
-            # Process terms in batches
-            batch_size = 50  # Process 50 terms at a time
+            # Process terms in smaller batches with progress updates
+            batch_size = 10  # Process 10 terms at a time for better progress granularity
             all_results = []
             
             for i in range(0, len(terms), batch_size):
@@ -223,7 +223,7 @@ class BatchService:
                 # Process batch
                 batch_response = await self.batch_map_terms(batch_request)
                 
-                # Update progress
+                # Update progress after each small batch
                 job.processed_terms += len(batch_terms)
                 job.successful_mappings += batch_response.successful_mappings
                 job.failed_mappings += batch_response.failed_mappings

@@ -18,11 +18,12 @@ class TerminologyAPIService:
     """Manages connections to external terminology APIs."""
     
     def __init__(self, cache_dir: Optional[str] = None):
-        """Initialize API service with optional caching."""
-        self.cache_dir = Path(cache_dir or "app/cache/api_cache")
-        self.cache_dir.mkdir(parents=True, exist_ok=True)
+        """Initialize API service with in-memory caching only."""
+        # Use in-memory cache instead of file-based cache
+        self._memory_cache = {}
         self.session = requests.Session()
-        self.cache_ttl = timedelta(days=7)  # Cache responses for 7 days
+        self.session.timeout = 5  # 5 second timeout for API requests
+        self.cache_ttl = timedelta(hours=1)  # Cache responses for 1 hour in memory
         
         # API endpoints
         self.apis = {
@@ -78,29 +79,28 @@ class TerminologyAPIService:
     
     def _get_cached_response(self, cache_key: str) -> Optional[Dict]:
         """Get cached response if available and not expired."""
-        cache_file = self.cache_dir / f"{cache_key}.json"
-        if cache_file.exists():
+        if cache_key in self._memory_cache:
             try:
-                with open(cache_file, 'r') as f:
-                    cached = json.load(f)
+                cached = self._memory_cache[cache_key]
                 cache_time = datetime.fromisoformat(cached['timestamp'])
                 if datetime.now() - cache_time < self.cache_ttl:
                     return cached['data']
+                else:
+                    # Remove expired cache entry
+                    del self._memory_cache[cache_key]
             except Exception as e:
-                logger.warning(f"Error reading cache: {e}")
+                logger.warning(f"Error reading memory cache: {e}")
         return None
     
     def _save_to_cache(self, cache_key: str, data: Dict):
-        """Save response to cache."""
-        cache_file = self.cache_dir / f"{cache_key}.json"
+        """Save response to memory cache."""
         try:
-            with open(cache_file, 'w') as f:
-                json.dump({
-                    'timestamp': datetime.now().isoformat(),
-                    'data': data
-                }, f)
+            self._memory_cache[cache_key] = {
+                'timestamp': datetime.now().isoformat(),
+                'data': data
+            }
         except Exception as e:
-            logger.warning(f"Error saving to cache: {e}")
+            logger.warning(f"Error saving to memory cache: {e}")
     
     def search_rxnorm(self, term: str, max_results: int = 10) -> List[Dict]:
         """Search RxNorm for medications."""

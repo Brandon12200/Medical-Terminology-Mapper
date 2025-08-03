@@ -321,10 +321,7 @@ class EnhancedTerminologyMapper:
         # Clear expired cache entries
         self.performance_optimizer.advanced_cache.clear_expired_entries()
         
-        # Optimize term cache
-        from app.extractors.term_cache import get_term_cache
-        term_cache = get_term_cache()
-        term_cache.optimize()
+        # Term cache optimization removed with extractors
         
         # Refresh rules cache
         self.rules_engine._load_rules_cache()

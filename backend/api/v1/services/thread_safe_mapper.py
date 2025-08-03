@@ -41,21 +41,63 @@ class ThreadSafeTerminologyMapper:
             
         for system in systems:
             try:
-                results = mapper.map_term(
-                    term=term,
-                    system=system,
-                    context=context
-                )
+                system_results = []
                 
-                # Format results
-                if results and results.get("found", False):
-                    system_results = [{
-                        "code": results.get("code", ""),
-                        "display": results.get("display", ""),
-                        "system": system,
-                        "confidence": results.get("confidence", 1.0),
-                        "match_type": results.get("match_type", "exact")
-                    }]
+                # Try to get multiple results from APIs first
+                if hasattr(mapper, 'external_service') and mapper.external_service:
+                    try:
+                        if system == 'snomed':
+                            # SNOMED APIs are having issues, skip to local database
+                            api_results = []
+                            logger.info(f"Skipping SNOMED APIs for '{term}' - using local database")
+                        elif system == 'loinc':
+                            api_results = mapper.external_service.search_clinical_tables(term, 'loinc', max_results=max_results_per_system)
+                        elif system == 'rxnorm':
+                            # Try RxNorm API first
+                            api_results = mapper.external_service.search_rxnorm(term, max_results=max_results_per_system)
+                            if not api_results:
+                                # Fallback to Clinical Tables
+                                api_results = mapper.external_service.search_clinical_tables(term, 'rxterms', max_results=max_results_per_system)
+                        else:
+                            api_results = []
+                        
+                        # Format API results
+                        for result in api_results:
+                            system_results.append({
+                                "code": result.get("code", ""),
+                                "display": result.get("display", ""),
+                                "system": system,
+                                "confidence": 0.95,
+                                "match_type": "api",
+                                "source": result.get("source", "external_api")
+                            })
+                            
+                        logger.info(f"Found {len(system_results)} API results for '{term}' in {system}")
+                        
+                    except Exception as e:
+                        logger.warning(f"API search failed for '{term}' in system '{system}': {str(e)}")
+                        # Continue to local fallback instead of failing completely
+                
+                # If no API results, fallback to local database
+                if not system_results:
+                    local_result = mapper.map_term(
+                        term=term,
+                        system=system,
+                        context=context
+                    )
+                    
+                    if local_result and local_result.get("found", False):
+                        system_results = [{
+                            "code": local_result.get("code", ""),
+                            "display": local_result.get("display", ""),
+                            "system": system,
+                            "confidence": local_result.get("confidence", 1.0),
+                            "match_type": local_result.get("match_type", "local"),
+                            "source": "local_database"
+                        }]
+                        logger.info(f"Found local fallback result for '{term}' in {system}")
+                
+                if system_results:
                     all_results[system] = system_results
                         
             except Exception as e:

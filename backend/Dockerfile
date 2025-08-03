@@ -34,14 +34,11 @@ ENV NLTK_DATA=/usr/local/share/nltk_data
 # Copy application code
 COPY app/ ./app/
 COPY api/ ./api/
-COPY scripts/ ./scripts/
 COPY tests/ ./tests/
 COPY data/ ./data/
-COPY celery_config.py .
-COPY start_celery_worker.py .
 
 # Create required directories
-RUN mkdir -p logs uploads exports cache models
+RUN mkdir -p logs uploads cache
 
 # Set Python path
 ENV PYTHONPATH="/app:${PYTHONPATH}"

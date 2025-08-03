@@ -190,52 +190,10 @@ class ComprehensiveValidator:
             return False
     
     def test_05_biobert_integration(self):
-        """Test BioBERT integration (if available)"""
+        """Test BioBERT integration (disabled - ML components removed)"""
         print("\n=== Test 5: BioBERT Integration ===")
-        
-        try:
-            # Try to import BioBERT service
-            from app.ml.biobert.biobert_service import BioBERTService
-            from app.standards.terminology.mapper import TerminologyMapper
-            
-            # Create services
-            terminology_mapper = TerminologyMapper()
-            biobert_service = BioBERTService(
-                use_advanced_extractor=True,
-                confidence_threshold=0.7,
-                terminology_mapper=terminology_mapper
-            )
-            
-            self.log_result("BioBERT Service Init", "PASS", "Service initialized successfully")
-            
-            # Test entity extraction
-            test_text = "Patient has diabetes mellitus and takes metformin 500mg daily."
-            entities = biobert_service.extract_entities(test_text, map_to_terminologies=False)
-            
-            if isinstance(entities, list):
-                self.log_result("Entity Extraction", "PASS", f"Extracted {len(entities)} entities")
-                
-                # Test with terminology mapping
-                entities_with_mapping = biobert_service.extract_entities(
-                    test_text, 
-                    map_to_terminologies=True
-                )
-                
-                mapped_count = sum(1 for e in entities_with_mapping if e.terminology_mappings)
-                if mapped_count > 0:
-                    self.log_result("Terminology Integration", "PASS", f"{mapped_count} entities mapped")
-                else:
-                    self.log_result("Terminology Integration", "WARN", "No entities mapped")
-            else:
-                self.log_result("Entity Extraction", "FAIL", "Entity extraction returned invalid type")
-            
-            return True
-        except ImportError as e:
-            self.log_result("BioBERT Integration", "WARN", f"BioBERT not available: {e}")
-            return True  # Not a failure if not installed
-        except Exception as e:
-            self.log_result("BioBERT Integration", "FAIL", f"BioBERT test failed: {e}")
-            return False
+        self.log_result("BioBERT Integration", "SKIP", "BioBERT functionality disabled in this build")
+        return True
     
     def test_06_api_models(self):
         """Test API model serialization"""

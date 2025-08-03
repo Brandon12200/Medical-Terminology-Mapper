@@ -29,10 +29,7 @@ httpx==0.26.0
 aiofiles==23.2.1
 python-magic==0.4.27
 
-# Background processing
-celery==5.3.4
-redis==5.0.1
-kombu==5.3.4
+# Background processing removed - using synchronous API
 
 # Testing requirements
 pytest==7.4.0
