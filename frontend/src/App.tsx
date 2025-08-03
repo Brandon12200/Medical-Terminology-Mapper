@@ -401,7 +401,7 @@ function App() {
                 <button 
                   onClick={() => setCurrentView('single')} 
                   className="feature-card"
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}
+                  style={{ border: 'none', cursor: 'pointer', textAlign: 'left' }}
                 >
                   <div className="feature-icon">📋</div>
                   <h2 className="feature-title">
@@ -416,7 +416,7 @@ function App() {
                 <button 
                   onClick={() => setCurrentView('batch')} 
                   className="feature-card"
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}
+                  style={{ border: 'none', cursor: 'pointer', textAlign: 'left' }}
                 >
                   <div className="feature-icon">📁</div>
                   <h2 className="feature-title">
@@ -632,7 +632,7 @@ function App() {
               {!isProcessing && !isComplete && (
                 <>
                   {/* File Upload Section */}
-                  <div style={{ background: 'white', padding: '2rem', borderRadius: '12px', boxShadow: '0 4px 6px rgba(0,0,0,0.07)', marginBottom: '2rem' }}>
+                  <div className="upload-section">
                     <h2 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '1rem', color: '#1a202c' }}>
                       📤 Upload Your Own CSV File
                     </h2>
