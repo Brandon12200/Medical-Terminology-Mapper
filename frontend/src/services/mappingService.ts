@@ -7,42 +7,6 @@ import type {
   SystemInfo 
 } from '../types';
 
-export interface AIExtractionRequest {
-  text: string;
-  systems?: string[];
-  fuzzy_threshold?: number;
-  include_context?: boolean;
-}
-
-export interface ExtractedTerm {
-  text: string;
-  entity_type: string;
-  confidence: number;
-  start: number;
-  end: number;
-}
-
-export interface AIExtractionResponse {
-  ai_enabled: boolean;
-  extracted_terms: ExtractedTerm[];
-  mapped_terms: Record<string, any>;
-  extraction_method: string;
-}
-
-export interface AIStatus {
-  ai_enabled: boolean;
-  model: string | null;
-  capabilities: string[];
-  status: string;
-}
-
-export interface TestFile {
-  filename: string;
-  name: string;
-  description: string;
-  size: number;
-  size_category: string;
-}
 
 export const mappingService = {
   // Map a single term
@@ -136,32 +100,4 @@ export const mappingService = {
     return data;
   },
 
-  // AI-powered features
-  getAIStatus: async (): Promise<AIStatus> => {
-    const { data } = await api.get<AIStatus>('/ai/status');
-    return data;
-  },
-
-  extractAndMapTerms: async (request: AIExtractionRequest): Promise<AIExtractionResponse> => {
-    const { data } = await api.post<AIExtractionResponse>('/ai/extract', request);
-    return data;
-  },
-
-  extractTermsOnly: async (text: string): Promise<{ ai_enabled: boolean; extracted_terms: ExtractedTerm[]; extraction_method: string }> => {
-    const { data } = await api.post('/ai/extract-only', { text });
-    return data;
-  },
-
-  // Test files
-  getTestFiles: async (): Promise<TestFile[]> => {
-    const { data } = await api.get<TestFile[]>('/test-files');
-    return data;
-  },
-
-  downloadTestFile: async (filename: string): Promise<Blob> => {
-    const { data } = await api.get(`/test-files/${filename}`, {
-      responseType: 'blob',
-    });
-    return data;
-  },
 };

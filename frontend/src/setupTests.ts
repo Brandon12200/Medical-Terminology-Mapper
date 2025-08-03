@@ -1,17 +1,18 @@
 import '@testing-library/jest-dom';
+import { vi } from 'vitest';
 
 // Mock fetch for tests
-global.fetch = jest.fn();
+global.fetch = vi.fn();
 
 // Mock window functions
 Object.defineProperty(window, 'open', {
-  value: jest.fn(),
+  value: vi.fn(),
 });
 
 Object.defineProperty(URL, 'createObjectURL', {
-  value: jest.fn(() => 'blob:mock-url'),
+  value: vi.fn(() => 'blob:mock-url'),
 });
 
 Object.defineProperty(URL, 'revokeObjectURL', {
-  value: jest.fn(),
+  value: vi.fn(),
 });

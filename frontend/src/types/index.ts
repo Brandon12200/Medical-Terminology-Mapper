@@ -40,15 +40,3 @@ export interface SystemInfo {
   total_concepts: number;
 }
 
-export interface AIExtractionRequest {
-  text: string;
-  system?: 'snomed' | 'loinc' | 'rxnorm' | 'all';
-  map_terms?: boolean;
-}
-
-export interface ExtractedTerm {
-  term: string;
-  category: string;
-  confidence: number;
-  mappings?: MappingResult[];
-}

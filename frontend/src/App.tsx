@@ -4,7 +4,6 @@ import { Layout } from './components/Layout/Layout';
 import { Home } from './pages/Home';
 import { SingleMapping } from './pages/SingleMapping';
 import { BatchMapping } from './pages/BatchMapping';
-// import AIExtraction from './pages/AIExtraction';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -24,7 +23,6 @@ function App() {
             <Route index element={<Home />} />
             <Route path="single" element={<SingleMapping />} />
             <Route path="batch" element={<BatchMapping />} />
-            {/* <Route path="ai-extraction" element={<AIExtraction />} /> */}
           </Route>
         </Routes>
       </BrowserRouter>
