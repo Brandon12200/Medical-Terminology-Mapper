@@ -61,7 +61,7 @@ cd medical-terminology-mapper
 ./start.sh
 
 # Access the application at http://localhost:5173
-# API docs available at http://localhost:8000/docs
+# API docs available at http://localhost:8000/api/docs
 
 # Stop the application
 ./stop.sh
@@ -106,7 +106,7 @@ npm run dev
 open http://localhost:5173
 ```
 
-## 📖 Usage Guide
+## Usage Guide
 
 ### 1. Single Term Mapping
 
@@ -144,7 +144,7 @@ open http://localhost:5173
   - Fuzzy: Similar terms using various algorithms
   - Pattern: Matches common medical patterns
 
-## 🏗️ Architecture
+## Architecture
 
 ```
 ┌─────────────┐    ┌─────────────┐    ┌──────────────┐    ┌─────────────┐
@@ -174,8 +174,8 @@ open http://localhost:5173
 **Frontend**:
 - React 19 with TypeScript
 - Vite for fast development and building
-- React Router for navigation
-- Native fetch API for data fetching
+- Minimal single-file architecture for improved performance
+- Axios for HTTP requests
 
 **Infrastructure**:
 - Docker & Docker Compose (simplified architecture)
@@ -215,8 +215,8 @@ GET /api/v1/test-files/{filename}
 ### Interactive API Documentation
 
 Once running, access the interactive API documentation:
-- **Swagger UI**: http://localhost:8000/docs
-- **ReDoc**: http://localhost:8000/redoc
+- **Swagger UI**: http://localhost:8000/api/docs
+- **ReDoc**: http://localhost:8000/api/redoc
 
 ## Testing
 

@@ -187,7 +187,7 @@ function App() {
     term: '',
     systems: ['all'],
     context: '',
-    fuzzy_threshold: 0.8,
+    fuzzy_threshold: 0.7,
   });
   const [singleLoading, setSingleLoading] = useState(false);
   const [singleError, setSingleError] = useState<string | null>(null);
@@ -458,7 +458,7 @@ function App() {
                 Single Term Mapping
               </h1>
               <p className="form-description">
-                Enter a medical term below to find its standardized mappings across SNOMED CT, LOINC, and RxNorm terminologies.
+                Enter a medical term to find its standardized mappings across SNOMED CT, LOINC, and RxNorm terminologies.
               </p>
               
               {/* Single Term Form */}
@@ -495,33 +495,6 @@ function App() {
                   </select>
                 </div>
 
-                <div className="form-group">
-                  <label htmlFor="context" className="form-label">Clinical Context (Optional)</label>
-                  <input
-                    type="text"
-                    id="context"
-                    name="context"
-                    value={singleFormData.context}
-                    onChange={handleSingleFormChange}
-                    placeholder="e.g., endocrine disorder"
-                    className="form-input"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="fuzzy_threshold" className="form-label">Fuzzy Match Threshold</label>
-                  <input
-                    type="number"
-                    id="fuzzy_threshold"
-                    name="fuzzy_threshold"
-                    value={singleFormData.fuzzy_threshold}
-                    onChange={handleSingleFormChange}
-                    min="0"
-                    max="1"
-                    step="0.1"
-                    className="form-input"
-                  />
-                </div>
 
                 <button
                   type="submit"
