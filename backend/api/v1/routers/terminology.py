@@ -61,12 +61,31 @@ async def map_term(request: MappingRequest):
         # Calculate processing time
         processing_time = (time.time() - start_time) * 1000
         
+        # Filter out any mappings with invalid data (None codes, etc.)
+        cleaned_results = {}
+        for system, mappings in results.items():
+            valid_mappings = []
+            for mapping in mappings:
+                # Check if mapping has required fields and they're not None
+                if (isinstance(mapping, dict) and 
+                    mapping.get("code") is not None and 
+                    mapping.get("display") is not None and
+                    mapping.get("system") is not None and
+                    str(mapping.get("code")).strip() != "" and
+                    str(mapping.get("display")).strip() != ""):
+                    valid_mappings.append(mapping)
+                else:
+                    logger.warning(f"Skipping invalid mapping for term '{request.term}' in system '{system}': {mapping}")
+            
+            if valid_mappings:
+                cleaned_results[system] = valid_mappings
+        
         # Count total matches
-        total_matches = sum(len(mappings) for mappings in results.values())
+        total_matches = sum(len(mappings) for mappings in cleaned_results.values())
         
         return MappingResponse(
             term=request.term,
-            results=results,
+            results=cleaned_results,
             total_matches=total_matches,
             processing_time_ms=round(processing_time, 2)
         )

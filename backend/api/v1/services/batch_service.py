@@ -66,21 +66,48 @@ class BatchService:
                 
                 if error:
                     failed += 1
+                    # Create response with empty results for failed terms
+                    response = MappingResponse(
+                        term=term,
+                        results={},
+                        total_matches=0,
+                        processing_time_ms=0
+                    )
+                    mapping_responses.append(response)
                 else:
-                    total_matches = sum(len(mappings) for mappings in term_results.values())
+                    # Filter out any mappings with invalid data (None codes, etc.)
+                    cleaned_results = {}
+                    for system, mappings in term_results.items():
+                        valid_mappings = []
+                        for mapping in mappings:
+                            # Check if mapping has required fields and they're not None
+                            if (isinstance(mapping, dict) and 
+                                mapping.get("code") is not None and 
+                                mapping.get("display") is not None and
+                                mapping.get("system") is not None and
+                                str(mapping.get("code")).strip() != "" and
+                                str(mapping.get("display")).strip() != ""):
+                                valid_mappings.append(mapping)
+                            else:
+                                logger.warning(f"Skipping invalid mapping for term '{term}' in system '{system}': {mapping}")
+                        
+                        if valid_mappings:
+                            cleaned_results[system] = valid_mappings
+                    
+                    total_matches = sum(len(mappings) for mappings in cleaned_results.values())
                     if total_matches > 0:
                         successful += 1
                     else:
                         failed += 1
-                
-                # Create mapping response
-                response = MappingResponse(
-                    term=term,
-                    results=term_results,
-                    total_matches=sum(len(mappings) for mappings in term_results.values()),
-                    processing_time_ms=0  # Individual times not tracked in batch
-                )
-                mapping_responses.append(response)
+                    
+                    # Create mapping response with cleaned results
+                    response = MappingResponse(
+                        term=term,
+                        results=cleaned_results,
+                        total_matches=total_matches,
+                        processing_time_ms=0  # Individual times not tracked in batch
+                    )
+                    mapping_responses.append(response)
             
             total_time = (time.time() - start_time) * 1000
             
@@ -235,15 +262,27 @@ class BatchService:
                     # Convert TermMapping objects to dictionaries for JSON serialization
                     serializable_mappings = {}
                     for system, mappings in result.results.items():
-                        serializable_mappings[system] = [
-                            mapping.model_dump() if hasattr(mapping, 'model_dump') else mapping
-                            for mapping in mappings
-                        ]
+                        valid_serializable_mappings = []
+                        for mapping in mappings:
+                            try:
+                                serialized = mapping.model_dump() if hasattr(mapping, 'model_dump') else mapping
+                                # Double-check serialized mapping has required fields
+                                if (serialized.get("code") is not None and 
+                                    serialized.get("display") is not None and
+                                    str(serialized.get("code")).strip() != ""):
+                                    valid_serializable_mappings.append(serialized)
+                                else:
+                                    logger.warning(f"Skipping invalid serialized mapping for term '{result.term}': {serialized}")
+                            except Exception as e:
+                                logger.warning(f"Error serializing mapping for term '{result.term}': {e}")
+                        
+                        if valid_serializable_mappings:
+                            serializable_mappings[system] = valid_serializable_mappings
                     
                     all_results.append({
                         "original_term": result.term,
                         "mappings": serializable_mappings,
-                        "total_matches": result.total_matches
+                        "total_matches": len([m for mappings in serializable_mappings.values() for m in mappings])
                     })
             
             # Save results
