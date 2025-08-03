@@ -49,21 +49,7 @@ check_docker_compose() {
 wait_for_services() {
     print_status "Waiting for services to start..."
     
-    # Wait for Redis
-    print_status "Checking Redis..."
-    timeout=60
-    while [ $timeout -gt 0 ]; do
-        if docker-compose ps redis | grep -q "healthy"; then
-            print_success "Redis is healthy"
-            break
-        fi
-        sleep 2
-        timeout=$((timeout - 2))
-    done
-    
-    if [ $timeout -le 0 ]; then
-        print_warning "Redis health check timed out, but continuing..."
-    fi
+    # Redis no longer needed - removed with Celery
     
     # Wait for Backend API
     print_status "Checking Backend API..."
@@ -138,7 +124,6 @@ show_urls() {
     echo "   • Web Interface:      http://localhost:3000"
     echo "   • API Documentation:  http://localhost:8000/docs"
     echo "   • API Health Check:   http://localhost:8000/health"
-    echo "   • Celery Monitor:     http://localhost:5555"
     echo ""
     echo "📊 Service Status:"
     docker-compose ps --format "table {{.Name}}\t{{.State}}\t{{.Ports}}"
