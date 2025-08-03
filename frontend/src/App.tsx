@@ -179,7 +179,7 @@ const ConfidenceBar = ({ confidence, height = 'md', showLabel = true }: {
 
 function App() {
   // Navigation state
-  const [currentView, setCurrentView] = useState<'home' | 'single' | 'batch'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'single' | 'batch' | 'docs'>('home');
   
   // Single mapping state
   const [singleResults, setSingleResults] = useState<MappingResponse | null>(null);
@@ -325,6 +325,17 @@ function App() {
     setBatchStatus(null);
   };
 
+  const resetSingle = () => {
+    setSingleResults(null);
+    setSingleError(null);
+    setSingleFormData({
+      term: '',
+      systems: ['all'],
+      context: '',
+      fuzzy_threshold: 0.7,
+    });
+  };
+
   // Export handlers
   const downloadSingleResults = (format: 'csv' | 'json') => {
     if (singleResults) {
@@ -375,6 +386,28 @@ function App() {
               style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', fontWeight: '500' }}
             >
               Batch Processing
+            </button>
+            <button 
+              onClick={() => setCurrentView('docs')}
+              style={{ 
+                background: 'rgba(255, 255, 255, 0.1)', 
+                border: '1px solid rgba(255, 255, 255, 0.2)', 
+                borderRadius: '6px',
+                padding: '0.5rem 0.75rem',
+                color: 'white', 
+                cursor: 'pointer', 
+                fontWeight: '500',
+                fontSize: '0.875rem',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.background = 'rgba(255, 255, 255, 0.15)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = 'rgba(255, 255, 255, 0.1)';
+              }}
+            >
+              📖 Docs
             </button>
           </nav>
         </div>
@@ -454,9 +487,23 @@ function App() {
           {/* Single Mapping View */}
           {currentView === 'single' && (
             <div className="form-container">
-              <h1 className="form-title">
-                Single Term Mapping
-              </h1>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                <h1 className="form-title" style={{ margin: 0 }}>
+                  Single Term Mapping
+                </h1>
+                {(singleResults || singleError) && (
+                  <button
+                    onClick={resetSingle}
+                    className="btn btn-secondary"
+                    style={{ 
+                      padding: '0.5rem 1rem',
+                      fontSize: '0.875rem'
+                    }}
+                  >
+                    New Search
+                  </button>
+                )}
+              </div>
               <p className="form-description">
                 Enter a medical term to find its standardized mappings across SNOMED CT, LOINC, and RxNorm terminologies.
               </p>
@@ -838,6 +885,124 @@ function App() {
                   </div>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Documentation View */}
+          {currentView === 'docs' && (
+            <div className="form-container">
+              <h1 className="form-title">
+                Documentation
+              </h1>
+              <p className="form-description">
+                Learn how to use the Medical Terminology Mapper effectively for standardizing healthcare data.
+              </p>
+
+              <div style={{ display: 'grid', gap: '2rem', marginTop: '2rem' }}>
+                {/* Getting Started */}
+                <div className="feature-card" style={{ cursor: 'default' }}>
+                  <h2 style={{ fontSize: '1.5rem', fontWeight: '600', color: '#1a202c', marginBottom: '1rem' }}>
+                    🚀 Getting Started
+                  </h2>
+                  <p style={{ color: '#4a5568', marginBottom: '1rem' }}>
+                    The Medical Terminology Mapper helps you convert medical terms into standardized codes from 
+                    SNOMED CT, LOINC, and RxNorm terminologies.
+                  </p>
+                  <ul style={{ color: '#4a5568', paddingLeft: '1.5rem' }}>
+                    <li><strong>Single Term Mapping</strong>: Map individual medical terms in real-time</li>
+                    <li><strong>Batch Processing</strong>: Upload CSV files to process thousands of terms at once</li>
+                    <li><strong>Multiple Systems</strong>: Get mappings across all major healthcare terminologies</li>
+                  </ul>
+                </div>
+
+                {/* Single Term Guide */}
+                <div className="feature-card" style={{ cursor: 'default' }}>
+                  <h2 style={{ fontSize: '1.5rem', fontWeight: '600', color: '#1a202c', marginBottom: '1rem' }}>
+                    📋 Single Term Mapping
+                  </h2>
+                  <div style={{ color: '#4a5568' }}>
+                    <p style={{ marginBottom: '1rem' }}>
+                      Use the Single Term page to map individual medical terms:
+                    </p>
+                    <ol style={{ paddingLeft: '1.5rem', marginBottom: '1rem' }}>
+                      <li>Enter a medical term (e.g., "diabetes", "chest pain", "amoxicillin")</li>
+                      <li>Select target terminology systems or choose "All Systems"</li>
+                      <li>Click "Map Term" to get standardized codes</li>
+                      <li>Review results with confidence scores and export if needed</li>
+                    </ol>
+                    <p><strong>Example terms to try:</strong> diabetes mellitus, hypertension, glucose test, insulin, pneumonia</p>
+                  </div>
+                </div>
+
+                {/* Batch Processing Guide */}
+                <div className="feature-card" style={{ cursor: 'default' }}>
+                  <h2 style={{ fontSize: '1.5rem', fontWeight: '600', color: '#1a202c', marginBottom: '1rem' }}>
+                    📁 Batch Processing
+                  </h2>
+                  <div style={{ color: '#4a5568' }}>
+                    <p style={{ marginBottom: '1rem' }}>
+                      Process multiple terms efficiently with batch uploads:
+                    </p>
+                    <ol style={{ paddingLeft: '1.5rem', marginBottom: '1rem' }}>
+                      <li>Prepare a CSV file with medical terms in the first column</li>
+                      <li>Upload your file or try one of our sample files</li>
+                      <li>Monitor real-time progress as terms are processed</li>
+                      <li>Download results in CSV or JSON format</li>
+                    </ol>
+                    <p><strong>CSV Format:</strong> Your file should have a header row with "term" as the column name.</p>
+                  </div>
+                </div>
+
+                {/* Understanding Results */}
+                <div className="feature-card" style={{ cursor: 'default' }}>
+                  <h2 style={{ fontSize: '1.5rem', fontWeight: '600', color: '#1a202c', marginBottom: '1rem' }}>
+                    📊 Understanding Results
+                  </h2>
+                  <div style={{ color: '#4a5568' }}>
+                    <h3 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '0.5rem', color: '#2d3748' }}>
+                      Confidence Scores
+                    </h3>
+                    <ul style={{ paddingLeft: '1.5rem', marginBottom: '1rem' }}>
+                      <li><span style={{ color: '#48bb78', fontWeight: '600' }}>🟢 High (80-100%)</span>: Excellent match, use with confidence</li>
+                      <li><span style={{ color: '#ed8936', fontWeight: '600' }}>🟡 Medium (60-79%)</span>: Good match, review recommended</li>
+                      <li><span style={{ color: '#e53e3e', fontWeight: '600' }}>🔴 Low (0-59%)</span>: Weak match, manual validation needed</li>
+                    </ul>
+                    
+                    <h3 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '0.5rem', color: '#2d3748' }}>
+                      Terminology Systems
+                    </h3>
+                    <ul style={{ paddingLeft: '1.5rem' }}>
+                      <li><strong>SNOMED CT</strong>: Comprehensive clinical terminology for conditions, procedures</li>
+                      <li><strong>LOINC</strong>: Laboratory observations and clinical measurements</li>
+                      <li><strong>RxNorm</strong>: Standardized medication and drug nomenclature</li>
+                    </ul>
+                  </div>
+                </div>
+
+                {/* API Access */}
+                <div className="feature-card" style={{ cursor: 'default' }}>
+                  <h2 style={{ fontSize: '1.5rem', fontWeight: '600', color: '#1a202c', marginBottom: '1rem' }}>
+                    🔌 API Access
+                  </h2>
+                  <div style={{ color: '#4a5568' }}>
+                    <p style={{ marginBottom: '1rem' }}>
+                      Integrate the Medical Terminology Mapper into your applications:
+                    </p>
+                    <div style={{ background: '#f7fafc', padding: '1rem', borderRadius: '8px', marginBottom: '1rem' }}>
+                      <p style={{ fontFamily: 'monospace', fontSize: '0.875rem' }}>
+                        <strong>Interactive Documentation:</strong><br/>
+                        <a href="http://localhost:8000/api/docs" target="_blank" rel="noopener noreferrer" style={{ color: '#667eea' }}>
+                          http://localhost:8000/api/docs
+                        </a>
+                      </p>
+                    </div>
+                    <p>
+                      Access comprehensive API documentation with interactive examples, request/response schemas, 
+                      and testing capabilities.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </div>
