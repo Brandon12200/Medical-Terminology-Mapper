@@ -37,14 +37,16 @@ The Medical Terminology Mapper provides an intuitive interface for mapping medic
   - Comprehensive Lab Tests
   - Pediatric Conditions
   - Hospital Discharge Summary
-- **Real-time Progress**: Track processing status with visual progress indicator
+- **Granular Progress**: Real-time progress updates every 10% with visual indicator
 - **Export Options**: Download results as CSV or JSON
 
 ### Technical Architecture
 - **RESTful API**: Comprehensive endpoints with OpenAPI documentation
-- **Optimized Databases**: SQLite with indexed terminology data
+- **External API Integration**: Comprehensive results from NIH RxNorm, Clinical Tables, and LOINC APIs
+- **Optimized Local Database**: SQLite with indexed terminology data for fallback
+- **Memory-Only Caching**: Fast in-memory API response caching
 - **Asynchronous Processing**: Background job queue for batch operations
-- **Docker Support**: One-command deployment with Docker Compose
+- **Docker Support**: Simplified one-command deployment
 
 ## Quick Start
 
@@ -92,11 +94,8 @@ python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 
-# Initialize terminology databases
-python scripts/setup_terminology_db.py
-
-# Start backend API
-python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+# Start backend API (databases auto-initialize)
+python -m uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
 
 # Frontend setup (new terminal)
 cd frontend
@@ -123,11 +122,12 @@ open http://localhost:5173
 2. Either:
    - Upload your own CSV file (must have a "term" column)
    - Try one of the pre-built sample files
-3. Monitor real-time processing progress
+3. Monitor granular real-time progress (updates every 10% completion)
 4. View results in a comprehensive table showing:
    - Original terms
    - Number of matches found
    - All terminology mappings with confidence scores
+   - API sources (NIH RxNorm, Clinical Tables) or local database fallback
 5. Export results as CSV or JSON
 
 ### 3. Understanding Results
@@ -138,7 +138,8 @@ open http://localhost:5173
   - 🔴 Low (<60%): Weak match, manual validation needed
 
 - **Match Types**:
-  - Exact: Perfect string match
+  - API: Results from external terminology APIs (high quality)
+  - Exact: Perfect string match in local database
   - Synonym: Matches known synonyms
   - Fuzzy: Similar terms using various algorithms
   - Pattern: Matches common medical patterns
@@ -147,16 +148,16 @@ open http://localhost:5173
 
 ```
 ┌─────────────┐    ┌─────────────┐    ┌──────────────┐    ┌─────────────┐
-│   React UI  │───▶│  FastAPI    │───▶│  Mapping     │───▶│  SQLite     │
-│  (TypeScript)│    │   REST API  │    │   Engine     │    │  Databases  │
-└─────────────┘    └─────────────┘    └──────────────┘    └─────────────┘
-                                              │
-                                              ▼
-                                    ┌──────────────────┐
-                                    │ Matching Algos:  │
-                                    │ - Exact Match    │
+│   React UI  │───▶│  FastAPI    │───▶│  Mapping     │───▶│ External    │
+│  (TypeScript)│    │   REST API  │    │   Engine     │    │ APIs        │
+└─────────────┘    └─────────────┘    └──────────────┘    │ (RxNorm,    │
+                                              │            │ LOINC, etc) │
+                                              │            └─────────────┘
+                                              ▼                    │
+                                    ┌──────────────────┐           │
+                                    │ Fallback:        │◄──────────┘
+                                    │ - Local SQLite   │
                                     │ - Fuzzy Match    │
-                                    │ - Synonym Match  │
                                     │ - Pattern Match  │
                                     └──────────────────┘
 ```
@@ -165,9 +166,10 @@ open http://localhost:5173
 
 **Backend**:
 - FastAPI for high-performance REST API
-- SQLite for terminology storage (600+ medical terms)
+- External API integration (NIH RxNorm, Clinical Tables, LOINC)
+- SQLite for local terminology storage (600+ medical terms for fallback)
 - Pydantic for data validation
-- Multiple fuzzy matching algorithms
+- Multiple fuzzy matching algorithms (RapidFuzz, TF-IDF, cosine similarity)
 
 **Frontend**:
 - React 19 with TypeScript
@@ -176,8 +178,8 @@ open http://localhost:5173
 - Native fetch API for data fetching
 
 **Infrastructure**:
-- Docker & Docker Compose
-- Nginx for production deployment
+- Docker & Docker Compose (simplified architecture)
+- No external dependencies (Redis/Celery removed)
 - GitHub Actions for CI/CD
 
 ## API Documentation
@@ -250,16 +252,19 @@ flake8
 
 ### Database Setup
 
-The terminology databases are automatically initialized with:
+The application uses both external APIs and local databases:
+
+**External APIs** (primary source):
+- **NIH RxNorm API**: Comprehensive medication terminology
+- **Clinical Tables API**: LOINC lab tests, SNOMED concepts
+- **LOINC FHIR API**: Laboratory observations
+
+**Local SQLite Databases** (fallback):
 - **SNOMED CT**: 600+ common medical concepts
-- **LOINC**: Laboratory and clinical observations
+- **LOINC**: Laboratory and clinical observations  
 - **RxNorm**: Medication terminology
 
-To reinitialize databases:
-```bash
-cd backend
-python scripts/setup_terminology_db.py
-```
+Databases auto-initialize on first startup. No manual setup required.
 
 ### Adding Custom Mappings
 
