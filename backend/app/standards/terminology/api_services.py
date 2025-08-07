@@ -139,10 +139,11 @@ class TerminologyAPIService:
             return cached
         
         try:
-            # First try exact search
+            # First try exact search with shorter timeout
             response = self.session.get(
                 f"{self.apis['rxnorm']['base_url']}/drugs.json",
-                params={'name': term}
+                params={'name': term},
+                timeout=10  # 10 second timeout to prevent hanging
             )
             response.raise_for_status()
             data = response.json()
@@ -161,18 +162,27 @@ class TerminologyAPIService:
                         'synonym': concept.get('synonym', '')
                     })
             
-            # If no results, try spelling suggestions
-            if not results:
-                spell_response = self.session.get(
-                    f"{self.apis['rxnorm']['base_url']}/spellingsuggestions.json",
-                    params={'name': term}
-                )
-                if spell_response.status_code == 200:
-                    spell_data = spell_response.json()
-                    suggestions = spell_data.get('suggestionGroup', {}).get('suggestionList', {}).get('suggestion', [])
-                    # Try searching with first suggestion
-                    if suggestions:
-                        return self.search_rxnorm(suggestions[0], max_results)
+            # If no results, try spelling suggestions (with recursion protection)
+            if not results and not hasattr(term, '_rxnorm_recursion_count'):
+                try:
+                    spell_response = self.session.get(
+                        f"{self.apis['rxnorm']['base_url']}/spellingsuggestions.json",
+                        params={'name': term},
+                        timeout=5  # Shorter timeout for spelling suggestions
+                    )
+                    if spell_response.status_code == 200:
+                        spell_data = spell_response.json()
+                        suggestions = spell_data.get('suggestionGroup', {}).get('suggestionList', {}).get('suggestion', [])
+                        # Try searching with first suggestion (mark to prevent infinite recursion)
+                        if suggestions and len(suggestions) > 0:
+                            first_suggestion = suggestions[0]
+                            # Simple recursion protection - don't recurse if suggestion is same as original
+                            if first_suggestion.lower() != term.lower():
+                                logger.debug(f"Trying RxNorm spelling suggestion: '{first_suggestion}' for '{term}'")
+                                return self.search_rxnorm(first_suggestion, max_results)
+                except Exception as spell_error:
+                    logger.warning(f"RxNorm spelling suggestions failed for '{term}': {spell_error}")
+                    # Continue to return empty results rather than failing completely
             
             # Limit results
             results = results[:max_results]

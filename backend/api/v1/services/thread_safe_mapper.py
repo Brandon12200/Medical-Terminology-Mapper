@@ -53,11 +53,20 @@ class ThreadSafeTerminologyMapper:
                         elif system == 'loinc':
                             api_results = mapper.external_service.search_clinical_tables(term, 'loinc', max_results=max_results_per_system)
                         elif system == 'rxnorm':
-                            # Try RxNorm API first
-                            api_results = mapper.external_service.search_rxnorm(term, max_results=max_results_per_system)
+                            # Try RxNorm API first with timeout protection
+                            try:
+                                api_results = mapper.external_service.search_rxnorm(term, max_results=max_results_per_system)
+                            except Exception as rxnorm_error:
+                                logger.warning(f"RxNorm API failed for '{term}': {str(rxnorm_error)[:100]}")
+                                api_results = []
+                            
                             if not api_results:
                                 # Fallback to Clinical Tables
-                                api_results = mapper.external_service.search_clinical_tables(term, 'rxterms', max_results=max_results_per_system)
+                                try:
+                                    api_results = mapper.external_service.search_clinical_tables(term, 'rxterms', max_results=max_results_per_system)
+                                except Exception as clinical_error:
+                                    logger.warning(f"Clinical Tables RxNorm fallback failed for '{term}': {str(clinical_error)[:100]}")
+                                    api_results = []
                         else:
                             api_results = []
                         
