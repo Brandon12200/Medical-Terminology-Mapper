@@ -116,7 +116,7 @@ class BatchMappingRequest(BaseModel):
     fuzzy_algorithms: Optional[List[FuzzyAlgorithm]] = Field(
         default=[FuzzyAlgorithm.ALL]
     )
-    max_results_per_term: Optional[int] = Field(default=5, ge=1, le=50)
+    max_results_per_term: Optional[int] = Field(default=5, ge=1, le=100)
 
 class BatchMappingResponse(BaseModel):
     results: List[MappingResponse]

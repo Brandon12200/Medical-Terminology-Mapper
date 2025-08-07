@@ -184,7 +184,9 @@ class BatchService:
                 df = pd.read_csv(file_path)
                 if column_name not in df.columns:
                     raise ValueError(f"Column '{column_name}' not found in CSV file")
-                return df[column_name].dropna().tolist()
+                terms_list = df[column_name].dropna().tolist()
+                logger.info(f"CSV file loaded: {len(terms_list)} terms")
+                return terms_list
                 
             elif file_format == FileFormat.JSON:
                 with open(file_path, 'r') as f:
@@ -225,6 +227,8 @@ class BatchService:
     ):
         """Process batch job in background."""
         try:
+            logger.info(f"Starting batch processing: {len(terms)} terms")
+            
             # Update job status to processing
             job = self.jobs[job_id]
             job.status = BatchStatus.PROCESSING
@@ -293,6 +297,8 @@ class BatchService:
             job.updated_at = datetime.utcnow()
             
             # Store results reference
+            logger.info(f"Storing {len(all_results)} results to database")
+            
             self.job_results[job_id] = {
                 "results": all_results,
                 "summary": {
@@ -364,7 +370,7 @@ class BatchService:
     async def get_job_results(
         self,
         job_id: str,
-        limit: int = 100,
+        limit: int = 1000,
         offset: int = 0
     ) -> Optional[BatchJobResult]:
         """Get job results by ID."""
@@ -376,9 +382,18 @@ class BatchService:
         if not results_data:
             return None
         
-        # Apply pagination
+        # Apply pagination - for large batches, return all results
         all_results = results_data["results"]
-        paginated_results = all_results[offset:offset + limit]
+        logger.info(f"Retrieving results: offset={offset}, limit={limit}, total={len(all_results)}")
+        
+        if limit >= 1000 or len(all_results) <= 100:
+            # Return all results for large batch requests or small result sets
+            paginated_results = all_results[offset:]
+            # Return all results
+        else:
+            # Apply normal pagination for smaller requests
+            paginated_results = all_results[offset:offset + limit]
+            # Apply pagination
         
         return BatchJobResult(
             job_id=job_id,

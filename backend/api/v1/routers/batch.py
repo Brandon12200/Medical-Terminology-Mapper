@@ -144,7 +144,7 @@ async def get_batch_status(job_id: str):
     summary="Get batch job results",
     description="Get the results of a completed batch processing job"
 )
-async def get_batch_results(job_id: str, limit: int = 100, offset: int = 0):
+async def get_batch_results(job_id: str, limit: int = 1000, offset: int = 0):
     """
     Get the results of a completed batch processing job.
     

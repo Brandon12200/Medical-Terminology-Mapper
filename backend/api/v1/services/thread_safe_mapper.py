@@ -46,10 +46,10 @@ class ThreadSafeTerminologyMapper:
                 # Try to get multiple results from APIs first
                 if hasattr(mapper, 'external_service') and mapper.external_service:
                     try:
+                        logger.debug(f"Starting API search for '{term}' in {system}")
                         if system == 'snomed':
-                            # SNOMED APIs are having issues, skip to local database
-                            api_results = []
-                            logger.info(f"Skipping SNOMED APIs for '{term}' - using local database")
+                            # Use improved SNOMED API search
+                            api_results = mapper.external_service.search_snomed_browser(term, max_results=max_results_per_system)
                         elif system == 'loinc':
                             api_results = mapper.external_service.search_clinical_tables(term, 'loinc', max_results=max_results_per_system)
                         elif system == 'rxnorm':

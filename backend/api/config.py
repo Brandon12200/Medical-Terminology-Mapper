@@ -28,9 +28,9 @@ class Settings(BaseSettings):
     upload_dir: str = "uploads"
     results_dir: str = "results"
     
-    # Batch Processing Settings
-    batch_size: int = 50
-    max_batch_terms: int = 1000
+    # Batch Processing Settings  
+    batch_size: int = 1000  # Increased from 50 to eliminate chunking issues
+    max_batch_terms: int = 2000  # Increased to handle larger batches
     
     # Cache Settings
     enable_cache: bool = True

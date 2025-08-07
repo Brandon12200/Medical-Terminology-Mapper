@@ -97,10 +97,12 @@ class TerminologyService:
             List of mapping results for each term
         """
         try:
-            # Process terms with rate limiting to avoid overwhelming APIs
+            logger.info(f"Processing {len(terms)} terms in batch mapping")
+            
+            # Process terms with optimized batching for better performance
             results = []
-            batch_size = 5  # Process 5 terms at a time
-            delay_between_batches = 0.2  # 200ms delay between batches
+            batch_size = 5  # Process 5 terms at a time (reduced to prevent API timeout issues)
+            delay_between_batches = 0.5  # 500ms delay between batches (increased to reduce API pressure)
             
             for i in range(0, len(terms), batch_size):
                 batch_terms = terms[i:i + batch_size]
@@ -119,36 +121,81 @@ class TerminologyService:
                     )
                     tasks.append(task)
                 
-                # Wait for current batch to complete with timeout
+                # Wait for current batch to complete with individual error handling
+                logger.info(f"Processing batch {i//batch_size + 1} with terms: {batch_terms}")
+                
                 try:
+                    # Use gather with return_exceptions=True to handle individual failures gracefully
                     batch_results = await asyncio.wait_for(
                         asyncio.gather(*tasks, return_exceptions=True),
-                        timeout=15  # 15 second timeout per batch
+                        timeout=90  # 90 second timeout per batch
                     )
+                    
+                    # Log individual term results within this batch
+                    for idx, (term, result) in enumerate(zip(batch_terms, batch_results)):
+                        if isinstance(result, Exception):
+                            logger.error(f"Term '{term}' failed with exception: {str(result)[:200]}")
+                        else:
+                            mappings_count = sum(len(mappings) for mappings in result.values()) if isinstance(result, dict) else 0
+                            if mappings_count == 0:
+                                logger.warning(f"Term '{term}' - APIs returned no mappings")
+                            else:
+                                logger.info(f"Term '{term}' - Found {mappings_count} mappings")
+                    
+                    # Log batch completion
+                    successful_in_batch = sum(1 for r in batch_results if not isinstance(r, Exception))
+                    failed_in_batch = len(batch_results) - successful_in_batch
+                    logger.info(f"Batch {i//batch_size + 1} completed: {successful_in_batch} successful, {failed_in_batch} failed")
+                    
                 except asyncio.TimeoutError:
-                    logger.warning(f"Batch {i//batch_size + 1} timed out, creating error results")
-                    batch_results = [Exception("Request timed out") for _ in batch_terms]
+                    logger.error(f"Batch {i//batch_size + 1} timed out after 90 seconds for terms: {batch_terms}")
+                    # Create timeout exceptions for this batch but continue processing
+                    batch_results = [Exception(f"Batch timeout processing '{term}'") for term in batch_terms]
+                except Exception as batch_error:
+                    logger.error(f"Critical batch error in batch {i//batch_size + 1}: {str(batch_error)[:200]}")
+                    # Create error exceptions for this batch but continue processing
+                    batch_results = [Exception(f"Batch error processing '{term}': {str(batch_error)[:100]}") for term in batch_terms]
+                
                 results.extend(batch_results)
                 
                 # Add delay between batches to avoid rate limiting
                 if i + batch_size < len(terms):
                     await asyncio.sleep(delay_between_batches)
             
-            # Format results
+            # Format results with detailed logging
             formatted_results = []
+            successful_count = 0
+            error_count = 0
+            
             for i, (term, result) in enumerate(zip(terms, results)):
                 if isinstance(result, Exception):
-                    logger.error(f"Error mapping term '{term}': {str(result)}")
+                    error_count += 1
+                    error_msg = str(result)[:200]  # Truncate long error messages
+                    logger.error(f"Error mapping term '{term}' (#{i+1}/{len(terms)}): {error_msg}")
                     formatted_results.append({
                         "term": term,
                         "results": {},
-                        "error": str(result)
+                        "error": error_msg,
+                        "status": "failed"
                     })
                 else:
+                    successful_count += 1
+                    # Count total mappings for this term
+                    total_mappings = sum(len(mappings) for mappings in result.values()) if isinstance(result, dict) else 0
+                    if total_mappings > 0:
+                        logger.info(f"Successfully mapped term '{term}' (#{i+1}/{len(terms)}): {total_mappings} mappings found")
+                        status = "success"
+                    else:
+                        logger.warning(f"No mappings found for term '{term}' (#{i+1}/{len(terms)})")
+                        status = "no_mappings"
+                    
                     formatted_results.append({
                         "term": term,
-                        "results": result
+                        "results": result,
+                        "status": status
                     })
+            
+            logger.info(f"Batch processing complete: {successful_count} successful, {error_count} errors out of {len(terms)} terms")
             
             return formatted_results
             

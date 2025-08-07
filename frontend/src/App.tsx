@@ -103,9 +103,16 @@ const mappingService = {
       const mappingData = item.mappings || item.results || {};
       
       if (mappingData && typeof mappingData === 'object') {
-        Object.entries(mappingData).forEach(([, systemMappings]) => {
+        Object.entries(mappingData).forEach(([system, systemMappings]) => {
           if (Array.isArray(systemMappings)) {
-            mappings.push(...systemMappings);
+            systemMappings.forEach(mapping => {
+              if (mapping && mapping.code && mapping.display) {
+                mappings.push({
+                  ...mapping,
+                  system: system
+                });
+              }
+            });
           }
         });
       }
@@ -818,7 +825,7 @@ function App() {
                         </thead>
                         <tbody>
                           {batchResults.map((result: MappingResponse, index: number) => (
-                            <tr key={index} style={{ borderBottom: '1px solid #e2e8f0', minHeight: '3rem' }}>
+                            <tr key={`${result.term}-${index}`} style={{ borderBottom: '1px solid #e2e8f0', minHeight: '3rem' }}>
                               <td style={{ padding: '1rem', fontSize: '0.875rem', color: '#1a202c', fontWeight: '500', verticalAlign: 'middle' }}>
                                 {result.term}
                               </td>
