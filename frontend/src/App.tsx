@@ -10,49 +10,49 @@ const SAMPLE_FILES = [
     filename: 'hospital_discharge_summary.csv',
     name: 'Hospital Discharge Summary',
     icon: '🏥',
-    description: '120+ comprehensive medical conditions across all specialties including cardiology, neurology, oncology, and emergency medicine with detailed clinical contexts.',
+    description: 'comprehensive medical conditions across all specialties including cardiology, neurology, oncology, and emergency medicine with detailed clinical contexts.',
     details: 'Complex multi-system cases • Severity classifications • Specialty mappings',
-    count: '120+ terms'
+    count: '120 terms'
   },
   {
     filename: 'comprehensive_lab_tests.csv',
     name: 'Comprehensive Lab Tests',
     icon: '🧪',
-    description: '150+ laboratory tests including hematology, chemistry, microbiology, immunology, and specialized genetic testing with clinical significance.',
+    description: 'laboratory tests including hematology, chemistry, microbiology, immunology, and specialized genetic testing with clinical significance.',
     details: 'LOINC optimization • Clinical contexts • Test type classifications',
-    count: '150+ terms'
+    count: '115 terms'
   },
   {
     filename: 'comprehensive_medications.csv',
     name: 'Pharmaceutical Database',
     icon: '💊',
-    description: '200+ medications covering all major drug classes from basic analgesics to specialized biologics with therapeutic indications and mechanisms.',
+    description: 'medications covering all major drug classes from basic analgesics to specialized biologics with therapeutic indications and mechanisms.',
     details: 'RxNorm standardization • Drug class mapping • Clinical applications',
-    count: '200+ terms'
+    count: '140 terms'
   },
   {
     filename: 'emergency_department_cases.csv',
     name: 'Emergency Department Cases',
     icon: '🚨',
-    description: '100+ emergency scenarios from critical life-threatening conditions to minor injuries with triage severity and specialty assignments.',
+    description: 'emergency scenarios from critical life-threatening conditions to minor injuries with triage severity and specialty assignments.',
     details: 'Severity scoring • Department routing • Clinical presentations',
-    count: '100+ terms'
+    count: '81 terms'
   },
   {
     filename: 'surgical_procedures.csv',
     name: 'Surgical Procedures',
     icon: '⚕️',
-    description: '130+ surgical procedures from minimally invasive outpatient procedures to complex multi-organ transplants with complexity ratings.',
+    description: 'surgical procedures from minimally invasive outpatient procedures to complex multi-organ transplants with complexity ratings.',
     details: 'Procedure complexity • Specialty mapping • Risk stratification',
-    count: '130+ terms'
+    count: '117 terms'
   },
   {
     filename: 'rare_diseases_comprehensive.csv',
     name: 'Rare Diseases',
     icon: '🧬',
-    description: '200+ rare genetic conditions including metabolic disorders, neurodegenerative diseases, and genetic syndromes with inheritance patterns.',
+    description: 'rare genetic conditions including metabolic disorders, neurodegenerative diseases, and genetic syndromes with inheritance patterns.',
     details: 'Genetic classifications • Inheritance patterns • Specialty focus areas',
-    count: '200+ terms'
+    count: '151 terms'
   }
 ];
 
