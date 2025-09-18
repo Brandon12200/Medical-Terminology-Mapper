@@ -22,9 +22,18 @@ The Medical Terminology Mapper provides an intuitive interface for mapping medic
 
 ### Intelligent Mapping Engine
 - **Multi-Stage Matching Pipeline**: Exact → Synonym → Fuzzy → Pattern matching
-- **Context-Aware Enhancement**: Clinical context improves mapping accuracy
-- **Multiple Algorithms**: Phonetic (Soundex, Metaphone), token-based, and character-based matching
-- **Confidence Scoring**: Each mapping includes a confidence score based on match quality
+- **Context-Aware Enhancement**:
+  - Clinical context keywords boost confidence scores
+  - System-specific context handling (conditions, medications, lab tests)
+  - Automatic abbreviation expansion (MI → Myocardial Infarction, HTN → Hypertension, etc.)
+  - Medical suffix recognition (-itis → inflammation, -emia → blood condition)
+  - Intelligent term variation generation
+- **Multiple Algorithms**: Token-based (token sort, token set), character-based (Levenshtein, Jaccard), and TF-IDF cosine similarity matching
+- **Advanced Term Processing**:
+  - Synonym expansion with 90+ medical term replacements
+  - Negation handling for accurate context understanding
+  - Pattern-based matching for common medical terminology structures
+- **Confidence Scoring**: Multi-factor scoring based on match quality, context relevance, and source reliability
 
 ### Batch Processing
 - **CSV Upload**: Process files with thousands of medical terms
@@ -37,13 +46,18 @@ The Medical Terminology Mapper provides an intuitive interface for mapping medic
   - Comprehensive Lab Tests
   - Pediatric Conditions
   - Hospital Discharge Summary
-- **Granular Progress**: Real-time progress updates every 10% with visual indicator
+- **Granular Progress**: Real-time progress updates after each batch of 10 terms with visual indicator
 - **Export Options**: Download results as CSV or JSON
 
 ### Technical Architecture
 - **RESTful API**: Comprehensive endpoints with OpenAPI documentation
-- **External API Integration**: Comprehensive results from NIH RxNorm, Clinical Tables, and LOINC APIs
-- **Optimized Local Database**: SQLite with indexed terminology data for fallback
+- **External API Integration**: Comprehensive results from multiple sources:
+  - NIH RxNorm API for medication terminology
+  - Clinical Tables API (RxTerms, LOINC, ICD10)
+  - LOINC FHIR API for laboratory observations
+  - SNOMED APIs (OntoServer, BioPortal)
+  - UMLS terminology services
+- **Optimized Local Database**: SQLite with 1,000+ indexed medical terms across SNOMED (633), LOINC (208), and RxNorm (237) for fallback
 - **Memory-Only Caching**: Fast in-memory API response caching
 - **Asynchronous Processing**: Background job queue for batch operations
 - **Docker Support**: Simplified one-command deployment
@@ -122,7 +136,7 @@ open http://localhost:5173
 2. Either:
    - Upload your own CSV file (must have a "term" column)
    - Try one of the pre-built sample files
-3. Monitor granular real-time progress (updates every 10% completion)
+3. Monitor granular real-time progress (updates after each batch of 10 terms)
 4. View results in a comprehensive table showing:
    - Original terms
    - Number of matches found
@@ -169,7 +183,8 @@ open http://localhost:5173
 - External API integration (NIH RxNorm, Clinical Tables, LOINC)
 - SQLite for local terminology storage (600+ medical terms for fallback)
 - Pydantic for data validation
-- Multiple fuzzy matching algorithms (RapidFuzz, TF-IDF, cosine similarity)
+- Multiple fuzzy matching algorithms (RapidFuzz token matching, TF-IDF vectorization, cosine similarity)
+- Context-aware enhancement system that improves accuracy based on clinical context
 
 **Frontend**:
 - React 19 with TypeScript
@@ -260,9 +275,10 @@ The application uses both external APIs and local databases:
 - **LOINC FHIR API**: Laboratory observations
 
 **Local SQLite Databases** (fallback):
-- **SNOMED CT**: 600+ common medical concepts
-- **LOINC**: Laboratory and clinical observations  
-- **RxNorm**: Medication terminology
+- **SNOMED CT**: 633 common medical concepts
+- **LOINC**: 208 laboratory and clinical observations
+- **RxNorm**: 237 medication terminology entries
+- **Total**: 1,078 medical terms for comprehensive fallback coverage
 
 Databases auto-initialize on first startup. No manual setup required.
 
